@@ -2,10 +2,19 @@ package com.camunda.consulting;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.camunda.bpm.engine.ProcessEngine;
+import org.camunda.bpm.engine.impl.Page;
 import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
+import org.camunda.bpm.engine.impl.cmd.AcquireJobsCmd;
+import org.camunda.bpm.engine.impl.context.Context;
+import org.camunda.bpm.engine.impl.interceptor.Command;
+import org.camunda.bpm.engine.impl.interceptor.CommandContext;
+import org.camunda.bpm.engine.impl.interceptor.CommandContextFactory;
+import org.camunda.bpm.engine.impl.interceptor.CommandExecutor;
+import org.camunda.bpm.engine.impl.persistence.entity.JobEntity;
 import org.camunda.bpm.engine.impl.util.ClockUtil;
 import org.camunda.bpm.engine.runtime.Job;
 import org.joda.time.DateTime;
@@ -18,8 +27,18 @@ public class SimulationExecutor {
   public static void execute(Date start, Date end) {
     ProcessEngineConfigurationImpl processEngineConfigurationImpl = SimulatorPlugin.getProcessEngineConfiguration();
     ProcessEngine processEngine = SimulatorPlugin.getProcessEngine();
+    CommandExecutor commandExecutor = processEngineConfigurationImpl.getCommandExecutorTxRequired();
+
     boolean metrics = processEngineConfigurationImpl.isMetricsEnabled() && processEngineConfigurationImpl.isDbMetricsReporterActivate();
     boolean jobExecutorEnabled = processEngineConfigurationImpl.getJobExecutor().isActive();
+
+    boolean jobExecutorAcquireByPriority = processEngineConfigurationImpl.isJobExecutorAcquireByPriority();
+    boolean jobExecutorPreferTimerJobs = processEngineConfigurationImpl.isJobExecutorPreferTimerJobs();
+    boolean jobExecutorAcquireByDueDate = processEngineConfigurationImpl.isJobExecutorAcquireByDueDate();
+
+    processEngineConfigurationImpl.setJobExecutorAcquireByPriority(false);
+    processEngineConfigurationImpl.setJobExecutorPreferTimerJobs(false);
+    processEngineConfigurationImpl.setJobExecutorAcquireByDueDate(true);
 
     try {
 
@@ -42,8 +61,15 @@ public class SimulationExecutor {
           // work around engine "bug"
           makeTimeGoBy();
 
-          job = processEngine.getManagementService().createJobQuery().duedateLowerThan(ClockUtil.getCurrentTime()).orderByJobDuedate().asc().listPage(0, 1)
-              .stream().findFirst();
+          // by setting the processEngineConfigurationImpl.setJobExecutor*
+          // properties we can be sure to get the next job with minimum due date
+          List<JobEntity> jobs = commandExecutor.execute(new Command<List<JobEntity>>() {
+            @Override
+            public List<JobEntity> execute(CommandContext commandContext) {
+              return commandContext.getJobManager().findNextJobsToExecute(new Page(0, 1));
+            }
+          });
+          job = jobs.stream().map(jobEntity -> (Job) jobEntity).findFirst();
           job.map(Job::getId).ifPresent(processEngine.getManagementService()::executeJob);
 
           job.map(Object::toString).ifPresent(System.out::println);
@@ -53,7 +79,7 @@ public class SimulationExecutor {
             lastMetricUpdate = new DateTime(ClockUtil.getCurrentTime().getTime());
             processEngineConfigurationImpl.getDbMetricsReporter().reportNow();
           }
-        } while (job.isPresent());
+        } while (job.isPresent() && (job.get().getDuedate() == null || !job.get().getDuedate().after(end)));
 
         // get the next job that is due after current time and adjust clock to
         // its due date
@@ -61,7 +87,7 @@ public class SimulationExecutor {
         job.map(Job::getDuedate).ifPresent(ClockUtil::setCurrentTime);
 
         System.out.println("Set time to: " + ClockUtil.getCurrentTime());
-      } while (job.isPresent() && !job.get().getDuedate().after(end));
+      } while (job.isPresent() && (job.get().getDuedate() == null || !job.get().getDuedate().after(end)));
 
     } finally {
       ClockUtil.reset();
@@ -71,6 +97,9 @@ public class SimulationExecutor {
         processEngineConfigurationImpl.getDbMetricsReporter()
             .setReporterId(processEngineConfigurationImpl.getMetricsReporterIdProvider().provideId(processEngine));
       }
+      processEngineConfigurationImpl.setJobExecutorAcquireByPriority(jobExecutorAcquireByPriority);
+      processEngineConfigurationImpl.setJobExecutorPreferTimerJobs(jobExecutorPreferTimerJobs);
+      processEngineConfigurationImpl.setJobExecutorAcquireByDueDate(jobExecutorAcquireByDueDate);
       if (jobExecutorEnabled) {
         processEngineConfigurationImpl.getJobExecutor().start();
       }
