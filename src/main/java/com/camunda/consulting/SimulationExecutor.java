@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.impl.Page;
@@ -25,31 +26,12 @@ public class SimulationExecutor {
   public static final int METRIC_WRITE_INTERVAL_MINUTES = 15;
 
   public static void execute(Date start, Date end) {
+
     ProcessEngineConfigurationImpl processEngineConfigurationImpl = SimulatorPlugin.getProcessEngineConfiguration();
     ProcessEngine processEngine = SimulatorPlugin.getProcessEngine();
     CommandExecutor commandExecutor = processEngineConfigurationImpl.getCommandExecutorTxRequired();
 
-    boolean metrics = processEngineConfigurationImpl.isMetricsEnabled() && processEngineConfigurationImpl.isDbMetricsReporterActivate();
-    boolean jobExecutorEnabled = processEngineConfigurationImpl.getJobExecutor().isActive();
-
-    boolean jobExecutorAcquireByPriority = processEngineConfigurationImpl.isJobExecutorAcquireByPriority();
-    boolean jobExecutorPreferTimerJobs = processEngineConfigurationImpl.isJobExecutorPreferTimerJobs();
-    boolean jobExecutorAcquireByDueDate = processEngineConfigurationImpl.isJobExecutorAcquireByDueDate();
-
-    processEngineConfigurationImpl.setJobExecutorAcquireByPriority(false);
-    processEngineConfigurationImpl.setJobExecutorPreferTimerJobs(false);
-    processEngineConfigurationImpl.setJobExecutorAcquireByDueDate(true);
-
-    try {
-
-      if (jobExecutorEnabled) {
-        processEngineConfigurationImpl.getJobExecutor().shutdown();
-      }
-
-      if (metrics) {
-        processEngineConfigurationImpl.getDbMetricsReporter().setReporterId("DEMO-DATA-GENERATOR");
-      }
-
+    runWithPreparedEngineConfiguration(processEngineConfigurationImpl, processEngine, () -> {
       // TODO have somting to create initial jobs for start events
       ClockUtil.setCurrentTime(start);
       DateTime lastMetricUpdate = null;
@@ -88,7 +70,33 @@ public class SimulationExecutor {
 
         System.out.println("Set time to: " + ClockUtil.getCurrentTime());
       } while (job.isPresent() && (job.get().getDuedate() == null || !job.get().getDuedate().after(end)));
+    });
+  }
 
+  private static void runWithPreparedEngineConfiguration(ProcessEngineConfigurationImpl processEngineConfigurationImpl, ProcessEngine processEngine,
+      Runnable runnable) {
+
+    boolean metrics = processEngineConfigurationImpl.isMetricsEnabled() && processEngineConfigurationImpl.isDbMetricsReporterActivate();
+    boolean jobExecutorEnabled = processEngineConfigurationImpl.getJobExecutor().isActive();
+
+    boolean jobExecutorAcquireByPriority = processEngineConfigurationImpl.isJobExecutorAcquireByPriority();
+    boolean jobExecutorPreferTimerJobs = processEngineConfigurationImpl.isJobExecutorPreferTimerJobs();
+    boolean jobExecutorAcquireByDueDate = processEngineConfigurationImpl.isJobExecutorAcquireByDueDate();
+
+    if (jobExecutorEnabled) {
+      processEngineConfigurationImpl.getJobExecutor().shutdown();
+    }
+
+    if (metrics) {
+      processEngineConfigurationImpl.getDbMetricsReporter().setReporterId("DEMO-DATA-GENERATOR");
+    }
+
+    processEngineConfigurationImpl.setJobExecutorAcquireByPriority(false);
+    processEngineConfigurationImpl.setJobExecutorPreferTimerJobs(false);
+    processEngineConfigurationImpl.setJobExecutorAcquireByDueDate(true);
+
+    try {
+      runnable.run();
     } finally {
       ClockUtil.reset();
       if (metrics) {
