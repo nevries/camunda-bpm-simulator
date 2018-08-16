@@ -250,13 +250,13 @@ public class SimulationParseListener implements BpmnParseListener {
   }
 
   private void addExternalTaskCompleteJobCreatingListener(ScopeImpl scope) {
-    // TODO Auto-generated method stub
+    //scope.addBuiltInListener();
 
   }
 
   private void addUserTaskCompleteJobCreatingListener(ActivityImpl activity) {
 
-    ((UserTaskActivityBehavior) activity.getActivityBehavior()).getTaskDefinition().addTaskListener(TaskListener.EVENTNAME_CREATE, new UserTaskCompleteJobCreateListener(activity));
+    ((UserTaskActivityBehavior) activity.getActivityBehavior()).getTaskDefinition().addTaskListener(TaskListener.EVENTNAME_CREATE, UserTaskCompleteJobCreateListener.instance());
 
   }
 
