@@ -1,7 +1,9 @@
 package com.camunda.consulting;
 
+import java.util.Iterator;
 import java.util.List;
 
+import org.camunda.bpm.engine.delegate.DelegateListener;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.camunda.bpm.engine.impl.bpmn.behavior.IntermediateThrowNoneEventActivityBehavior;
 import org.camunda.bpm.engine.impl.bpmn.behavior.TaskActivityBehavior;
@@ -10,7 +12,6 @@ import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParse;
 import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParseListener;
 import org.camunda.bpm.engine.impl.core.model.CoreModelElement;
 import org.camunda.bpm.engine.impl.persistence.entity.ProcessDefinitionEntity;
-import org.camunda.bpm.engine.impl.pvm.delegate.ActivityBehavior;
 import org.camunda.bpm.engine.impl.pvm.process.ActivityImpl;
 import org.camunda.bpm.engine.impl.pvm.process.ScopeImpl;
 import org.camunda.bpm.engine.impl.pvm.process.TransitionImpl;
@@ -25,7 +26,7 @@ public class SimulationParseListener implements BpmnParseListener {
 
   @Override
   public void parseProcess(Element processElement, ProcessDefinitionEntity processDefinition) {
-    stripListeners(processDefinition);
+    stripExecutionListeners(processDefinition);
   }
 
   @Override
@@ -98,6 +99,8 @@ public class SimulationParseListener implements BpmnParseListener {
     addPayloadGeneratingListener(activity);
 
     addUserTaskCompleteJobCreatingListener(activity);
+
+    ((UserTaskActivityBehavior) activity.getActivityBehavior()).getTaskDefinition().getTaskListeners().clear();
   }
 
   @Override
@@ -247,21 +250,41 @@ public class SimulationParseListener implements BpmnParseListener {
   }
 
   private void addEventSubscriptionJobCreateListener(ActivityImpl activity) {
-    activity.getListeners().get(ExecutionListener.EVENTNAME_START).add(EventSubscriptionJobCreateListener.instance());
+    activity.addListener(ExecutionListener.EVENTNAME_START, EventSubscriptionJobCreateListener.instance());
   }
 
-  private void stripListeners(CoreModelElement element) {
+  private void stripExecutionListeners(ProcessDefinitionEntity processDefinitionEntity) {
 
-//    // execution listeners
-//    element.getListeners().clear();
-//
-//    // task listeners
-//    if(element instanceof ActivityImpl){
-//      ActivityBehavior activityBehavior = ((ActivityImpl) element).getActivityBehavior();
-//      if (activityBehavior instanceof UserTaskActivityBehavior){
-//        ((UserTaskActivityBehavior)activityBehavior).getTaskDefinition().getTaskListeners().clear();
-//      }
-//    }
+    processDefinitionEntity.getActivities().forEach(this::stripExecutionListeners);
+
+    stripNonBuiltinListeners(processDefinitionEntity);
 
   }
+
+  private void stripExecutionListeners(ActivityImpl activity) {
+    stripNonBuiltinListeners(activity);
+
+    List<ActivityImpl> children = activity.getActivities();
+
+    // stop recursion
+    if (children.isEmpty()) {
+      return;
+    }
+
+    // recurse
+    children.stream().forEach(this::stripExecutionListeners);
+
+  }
+
+  private void stripNonBuiltinListeners(CoreModelElement element) {
+    element.getListeners().keySet().forEach(eventType -> {
+      for (Iterator<DelegateListener<?>> i = element.getListeners(eventType).iterator(); i.hasNext();) {
+        DelegateListener<?> currentListener = i.next();
+        if (!element.getBuiltInListeners(eventType).contains(currentListener)) {
+          i.remove();
+        }
+      }
+    });
+  }
+
 }

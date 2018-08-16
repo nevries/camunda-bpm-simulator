@@ -34,9 +34,15 @@ public class SimulationParseListenerTest {
         ProcessInstance processInstance = runtimeService().startProcessInstanceByKey("parseListenerTest");
         assertThat(processInstance).isStarted();
         complete(task());
+        
+        execute(job()); // multi-inst 1
+        execute(job()); // multi-inst 2
+        
         assertThat(processInstance).isEnded();
 
-        assertThat(historyService().createHistoricVariableInstanceQuery().count()).isEqualTo(0);
+        // check for 4 because of multi-instance stuff
+        // TODO: make the check better
+        assertThat(historyService().createHistoricVariableInstanceQuery().count()).isEqualTo(4);
 
     }
 

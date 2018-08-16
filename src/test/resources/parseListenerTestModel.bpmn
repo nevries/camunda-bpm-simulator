@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_0rj1pcn" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="1.16.1">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0rj1pcn" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="1.16.0">
   <bpmn:process id="parseListenerTest" isExecutable="true">
     <bpmn:extensionElements>
       <camunda:executionListener delegateExpression="${execution.setVariable(&#39;processDefinitionStartListenerExecuted&#39;,true)}" event="start" />
@@ -12,9 +12,9 @@
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="SequenceFlow_0vtwf8o" sourceRef="StartEvent_1" targetRef="Task_0km1cp5" />
     <bpmn:endEvent id="EndEvent_1thx1ph">
-      <bpmn:incoming>SequenceFlow_1xbjr6c</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_032uzw2</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_1xbjr6c" sourceRef="Task_0km1cp5" targetRef="EndEvent_1thx1ph" />
+    <bpmn:sequenceFlow id="SequenceFlow_1xbjr6c" sourceRef="Task_0km1cp5" targetRef="SubProcess_0kqb819" />
     <bpmn:userTask id="Task_0km1cp5" name="Has listeners">
       <bpmn:extensionElements>
         <camunda:executionListener expression="${execution.setVariable(&#39;executionStartListenerExecuted&#39;,true)}" event="start" />
@@ -24,6 +24,43 @@
       <bpmn:incoming>SequenceFlow_0vtwf8o</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1xbjr6c</bpmn:outgoing>
     </bpmn:userTask>
+    <bpmn:subProcess id="SubProcess_0kqb819">
+      <bpmn:incoming>SequenceFlow_1xbjr6c</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_032uzw2</bpmn:outgoing>
+      <bpmn:multiInstanceLoopCharacteristics isSequential="true">
+        <bpmn:loopCardinality xsi:type="bpmn:tFormalExpression">2</bpmn:loopCardinality>
+      </bpmn:multiInstanceLoopCharacteristics>
+      <bpmn:startEvent id="StartEvent_1buw5z3">
+        <bpmn:outgoing>SequenceFlow_0s0x8j3</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:sequenceFlow id="SequenceFlow_0s0x8j3" sourceRef="StartEvent_1buw5z3" targetRef="Task_0u953ok" />
+      <bpmn:endEvent id="EndEvent_1x4jpny">
+        <bpmn:incoming>SequenceFlow_12rdmc1</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow_12rdmc1" sourceRef="Task_0u953ok" targetRef="EndEvent_1x4jpny" />
+      <bpmn:userTask id="Task_0u953ok" name="Blubb">
+        <bpmn:incoming>SequenceFlow_0s0x8j3</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_12rdmc1</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:endEvent id="EndEvent_0uswqow">
+        <bpmn:incoming>SequenceFlow_1n9e77e</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow_1n9e77e" sourceRef="BoundaryEvent_00wh0k7" targetRef="EndEvent_0uswqow" />
+      <bpmn:boundaryEvent id="BoundaryEvent_00wh0k7" name="has listener" attachedToRef="Task_0u953ok">
+        <bpmn:extensionElements>
+          <camunda:executionListener expression="${execution.setVariable(&#39;executionEndListenerOnBoundaryInMultiInstanceExecuted&#39;,true)}" event="end" />
+        </bpmn:extensionElements>
+        <bpmn:outgoing>SequenceFlow_1n9e77e</bpmn:outgoing>
+        <bpmn:timerEventDefinition>
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT1M</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:boundaryEvent>
+    </bpmn:subProcess>
+    <bpmn:sequenceFlow id="SequenceFlow_032uzw2" sourceRef="SubProcess_0kqb819" targetRef="EndEvent_1thx1ph" />
+    <bpmn:textAnnotation id="TextAnnotation_13boi91">
+      <bpmn:text>2 times</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_1yhiynm" sourceRef="SubProcess_0kqb819" targetRef="TextAnnotation_13boi91" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="parseListenerTest">
@@ -35,15 +72,59 @@
         <di:waypoint x="366" y="162" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="EndEvent_1thx1ph_di" bpmnElement="EndEvent_1thx1ph">
-        <dc:Bounds x="594" y="144" width="36" height="36" />
+        <dc:Bounds x="961" y="144" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_1xbjr6c_di" bpmnElement="SequenceFlow_1xbjr6c">
         <di:waypoint x="466" y="162" />
-        <di:waypoint x="594" y="162" />
+        <di:waypoint x="537" y="162" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="UserTask_0ecnwvl_di" bpmnElement="Task_0km1cp5">
         <dc:Bounds x="366" y="122" width="100" height="80" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess_0kqb819_di" bpmnElement="SubProcess_0kqb819" isExpanded="true">
+        <dc:Bounds x="537" y="62" width="352" height="197" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_032uzw2_di" bpmnElement="SequenceFlow_032uzw2">
+        <di:waypoint x="889" y="162" />
+        <di:waypoint x="961" y="162" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StartEvent_1buw5z3_di" bpmnElement="StartEvent_1buw5z3">
+        <dc:Bounds x="567" y="143" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0s0x8j3_di" bpmnElement="SequenceFlow_0s0x8j3">
+        <di:waypoint x="603" y="161" />
+        <di:waypoint x="653" y="161" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_1x4jpny_di" bpmnElement="EndEvent_1x4jpny">
+        <dc:Bounds x="803" y="143" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_12rdmc1_di" bpmnElement="SequenceFlow_12rdmc1">
+        <di:waypoint x="753" y="161" />
+        <di:waypoint x="803" y="161" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="UserTask_1j59o33_di" bpmnElement="Task_0u953ok">
+        <dc:Bounds x="653" y="121" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0uswqow_di" bpmnElement="EndEvent_0uswqow">
+        <dc:Bounds x="803" y="183" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1n9e77e_di" bpmnElement="SequenceFlow_1n9e77e">
+        <di:waypoint x="771" y="201" />
+        <di:waypoint x="803" y="201" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="BoundaryEvent_1wxbb22_di" bpmnElement="BoundaryEvent_00wh0k7">
+        <dc:Bounds x="735" y="183" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="725" y="226" width="57" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_13boi91_di" bpmnElement="TextAnnotation_13boi91">
+        <dc:Bounds x="663" y="283" width="100" height="30" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_1yhiynm_di" bpmnElement="Association_1yhiynm">
+        <di:waypoint x="713" y="259" />
+        <di:waypoint x="713" y="283" />
+      </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
