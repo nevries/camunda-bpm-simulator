@@ -22,6 +22,7 @@ import org.camunda.bpm.engine.variable.Variables.SerializationDataFormats;
 import org.camunda.bpm.engine.variable.value.FileValue;
 import org.camunda.bpm.engine.variable.value.TypedValue;
 import org.joda.time.DateTime;
+import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,16 +30,23 @@ public class PayloadGenerator {
   private static Logger LOG = LoggerFactory.getLogger(PayloadGenerator.class);
 
   private Map<String, NormalDistribution> normalDistributionRegistry = new HashMap<>();
-  
+
   private NormalDistribution getNormalDistribution(String name, double mean, double standardDeviation) {
     NormalDistribution normalDistribution = normalDistributionRegistry.get(name);
     if (normalDistribution == null) {
-      normalDistribution = new NormalDistribution();
+      normalDistribution = new NormalDistribution(mean, standardDeviation);
       normalDistributionRegistry.put(name, normalDistribution);
     }
     if (mean != normalDistribution.getMean() || standardDeviation != normalDistribution.getStandardDeviation()) {
-      //throw new RuntimeException("You cannot use the sa)
-      //TODO
+      throw new RuntimeException("You cannot create two normal distribution with the same name (and different mean and deviation).");
+    }
+    return normalDistribution;
+  }
+
+  private NormalDistribution getNormalDistribution(String name) {
+    NormalDistribution normalDistribution = normalDistributionRegistry.get(name);
+    if (normalDistribution == null) {
+      throw new RuntimeException("You have to create a normal distribution first with mean and deviation.");
     }
     return normalDistribution;
   }
@@ -302,10 +310,8 @@ public class PayloadGenerator {
    * @param standardDeviation
    * @return
    */
-  public Integer normalInt(String distributionName, int mean, int standardDeviation) {
-    getNormalDistribution(distributionName, mean, standardDeviation);
-    //TODO
-    return null;
+  public Double normal(String distributionName, double mean, double standardDeviation) {
+    return getNormalDistribution(distributionName, mean, standardDeviation).sample();
   }
 
   /**
@@ -462,11 +468,96 @@ public class PayloadGenerator {
     return (List<T>) listFromArray(new Object[] { o1, o2, o3, o4, o5, o6, o7, o8, o9 });
   }
 
+  /**
+   * Current process engine's time.
+   * 
+   * @return
+   */
   public Date now() {
     return ClockUtil.getCurrentTime();
   }
-  
+
+  /**
+   * Current process engine's time plus given amount of milliseconds (negative
+   * values allowed).
+   * 
+   * @return
+   */
+  public Date nowPlusMillis(int millis) {
+    return nowPlusPeriod(Period.millis(millis));
+  }
+
+  /**
+   * Current process engine's time plus given amount of seconds (negative values
+   * allowed).
+   * 
+   * @return
+   */
   public Date nowPlusSeconds(int seconds) {
-    return new DateTime(ClockUtil.getCurrentTime().getTime()).plusSeconds(seconds).toDate();
+    return nowPlusPeriod(Period.seconds(seconds));
+  }
+
+  /**
+   * Current process engine's time plus given amount of minutes (negative values
+   * allowed).
+   * 
+   * @return
+   */
+  public Date nowPlusMinutes(int minutes) {
+    return nowPlusPeriod(Period.minutes(minutes));
+  }
+
+  /**
+   * Current process engine's time plus given amount of hours (negative values
+   * allowed).
+   * 
+   * @return
+   */
+  public Date nowPlusHours(int hours) {
+    return nowPlusPeriod(Period.hours(hours));
+  }
+
+  /**
+   * Current process engine's time plus given amount of days (negative values
+   * allowed).
+   * 
+   * @return
+   */
+  public Date nowPlusDays(int days) {
+    return nowPlusPeriod(Period.days(days));
+  }
+
+  /**
+   * Current process engine's time plus given amount of weeks (negative values
+   * allowed).
+   * 
+   * @return
+   */
+  public Date nowPlusWeeks(int weeks) {
+    return nowPlusPeriod(Period.weeks(weeks));
+  }
+
+  /**
+   * Current process engine's time plus given amount of months (negative values
+   * allowed).
+   * 
+   * @return
+   */
+  public Date nowPlusMonths(int months) {
+    return nowPlusPeriod(Period.months(months));
+  }
+
+  /**
+   * Current process engine's time plus given amount of years (negative values
+   * allowed).
+   * 
+   * @return
+   */
+  public Date nowPlusYears(int years) {
+    return nowPlusPeriod(Period.years(years));
+  }
+
+  public Date nowPlusPeriod(Period period) {
+    return new DateTime(ClockUtil.getCurrentTime().getTime()).plus(period).toDate();
   }
 }
