@@ -12,7 +12,7 @@ import java.util.Optional;
 public class UserTaskCompleteJobCreateListener extends AbstractJobCreateListener implements TaskListener{
 
   private static UserTaskCompleteJobCreateListener INSTANCE = null;
-  
+
   public static TaskListener instance() {
     if (INSTANCE == null) {
       INSTANCE = new UserTaskCompleteJobCreateListener();

@@ -1,5 +1,6 @@
 package com.camunda.consulting;
 
+import com.camunda.consulting.listener.ExternalTaskJobCreateListener;
 import com.camunda.consulting.listener.FireEventJobCreateListener;
 import com.camunda.consulting.listener.PayloadGeneratorListener;
 import com.camunda.consulting.listener.UserTaskCompleteJobCreateListener;
@@ -250,7 +251,7 @@ public class SimulationParseListener implements BpmnParseListener {
   }
 
   private void addExternalTaskCompleteJobCreatingListener(ScopeImpl scope) {
-    //scope.addBuiltInListener();
+    scope.addBuiltInListener(ExecutionListener.EVENTNAME_START, ExternalTaskJobCreateListener.instance());
 
   }
 
