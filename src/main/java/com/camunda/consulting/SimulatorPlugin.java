@@ -3,6 +3,8 @@ package com.camunda.consulting;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.camunda.consulting.jobhandler.CompleteUserTaskJobHandler;
+import com.camunda.consulting.jobhandler.FireEventJobHandler;
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParseListener;
 import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;

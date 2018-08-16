@@ -1,4 +1,4 @@
-package com.camunda.consulting;
+package com.camunda.consulting.jobhandler;
 
 import org.camunda.bpm.engine.ProcessEngineException;
 import org.camunda.bpm.engine.impl.SignalEventReceivedBuilderImpl;
@@ -57,7 +57,7 @@ public class FireEventJobHandler implements JobHandler<FireEventJobHandler.FireE
     final String eventName;
     final String eventType;
 
-    FireEventJobHandlerConfiguration(String eventType, String eventName) {
+    public FireEventJobHandlerConfiguration(String eventType, String eventName) {
       this.eventName = eventName;
       this.eventType = eventType;
     }

@@ -1,15 +1,19 @@
-package com.camunda.consulting;
+package com.camunda.consulting.jobhandler;
 
+import com.camunda.consulting.SimulationExecutor;
+import com.camunda.consulting.TestPayloadGenerator;
 import org.apache.ibatis.logging.LogFactory;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.test.Deployment;
 import org.camunda.bpm.engine.test.ProcessEngineRule;
+import org.camunda.bpm.engine.test.mock.Mocks;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import static org.camunda.bpm.engine.test.assertions.ProcessEngineAssertions.*;
+import static org.camunda.bpm.engine.test.assertions.ProcessEngineAssertions.assertThat;
+import static org.camunda.bpm.engine.test.assertions.ProcessEngineAssertions.init;
 import static org.camunda.bpm.engine.test.assertions.ProcessEngineTests.*;
 
 @Deployment(resources = "userTaskCompleteModel.bpmn")
@@ -25,13 +29,16 @@ public class CompleteUserTaskJobHandlerTest {
     @Before
     public void setup() {
         init(rule.getProcessEngine());
+        Mocks.register("testPayloadGenerator", new TestPayloadGenerator());
     }
 
     @Test
     public void shouldExecuteCompleteTaskJob() {
 
         ProcessInstance processInstance = runtimeService().startProcessInstanceByKey("userTaskComplete");
-        assertThat(processInstance).isStarted().isWaitingAt("Task_157nl2o");
+        assertThat(processInstance).isStarted().isWaitingAt("Task_1");
+        complete(task());
+        assertThat(processInstance).isWaitingAt("Task_2");
 
         SimulationExecutor.execute(DateTime.now().minusMinutes(5).toDate(), DateTime.now().plusMinutes(5).toDate());
 
