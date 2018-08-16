@@ -23,7 +23,7 @@ public class UserTaskCompleteJobCreateListener extends AbstractJobCreateListener
   @Override
     public void notify(DelegateTask task) {
 
-      Optional<Expression> nextFireExpression = getCachedNextFireExpression(task.getExecution(), ((ExecutionEntity) task.getExecution()).getActivity());
+      Optional<Expression> nextFireExpression = getCachedNextFireExpression(task.getExecution(), activity.getActivityId());
 
       if(nextFireExpression.isPresent()) {
             Date dueDate = (Date) nextFireExpression.get().getValue(task.getExecution());

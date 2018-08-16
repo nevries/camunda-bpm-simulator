@@ -1,6 +1,7 @@
 package com.camunda.consulting;
 
 import com.camunda.consulting.listener.FireEventJobCreateListener;
+import com.camunda.consulting.listener.PayloadGeneratorListener;
 import com.camunda.consulting.listener.UserTaskCompleteJobCreateListener;
 import org.camunda.bpm.engine.delegate.DelegateListener;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
@@ -244,9 +245,8 @@ public class SimulationParseListener implements BpmnParseListener {
     addPayloadGeneratingListener(conditionalActivity);
   }
 
-  private void addPayloadGeneratingListener(ActivityImpl startEventActivity) {
-    // TODO Auto-generated method stub
-
+  private void addPayloadGeneratingListener(ActivityImpl activity) {
+    activity.addBuiltInListener(ExecutionListener.EVENTNAME_END, PayloadGeneratorListener.instance());
   }
 
   private void addExternalTaskCompleteJobCreatingListener(ScopeImpl scope) {

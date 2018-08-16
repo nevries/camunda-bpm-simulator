@@ -28,7 +28,6 @@ public class FireEventJobCreateListener extends AbstractJobCreateListener implem
 
   @Override
   public void notify(DelegateExecution execution) throws Exception {
-    LOG.debug(this + " called");
     ((ExecutionEntity) execution).getEventSubscriptions().stream() //
         .filter(eventSubscription -> EventType.MESSAGE.name().equals(eventSubscription.getEventType())
             || EventType.SIGNAL.name().equals(eventSubscription.getEventType())) //
@@ -41,7 +40,7 @@ public class FireEventJobCreateListener extends AbstractJobCreateListener implem
     ExecutionEntity execution = eventSubscription.getExecution();
     ActivityImpl activity = eventSubscription.getActivity();
 
-    Optional<Expression> nextFireExpression = getCachedNextFireExpression(execution, activity);
+    Optional<Expression> nextFireExpression = getCachedNextFireExpression(execution, activity.getActivityId());
 
     // create timer job only if we have the time configured... makes sense
     if (nextFireExpression.isPresent()) {

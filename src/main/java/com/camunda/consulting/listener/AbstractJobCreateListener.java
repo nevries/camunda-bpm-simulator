@@ -29,18 +29,18 @@ public class AbstractJobCreateListener {
     super();
   }
 
-  protected Optional<Expression> getCachedNextFireExpression(DelegateExecution execution, ActivityImpl activity) {
+  protected Optional<Expression> getCachedNextFireExpression(DelegateExecution execution, String activityId) {
     Map<String, Optional<Expression>> activityIdToExpression = nextFireExpressionCache.get(execution.getProcessDefinitionId());
     if (activityIdToExpression == null) {
       activityIdToExpression = new HashMap<>();
       nextFireExpressionCache.put(execution.getProcessDefinitionId(), activityIdToExpression);
     }
-    Optional<Expression> nextFireExpression = activityIdToExpression.get(activity.getActivityId());
+    Optional<Expression> nextFireExpression = activityIdToExpression.get(activityId);
     if (nextFireExpression == null) {
-      ModelElementInstance modelElementInstance = execution.getBpmnModelInstance().getModelElementById(activity.getActivityId());
+      ModelElementInstance modelElementInstance = execution.getBpmnModelInstance().getModelElementById(activityId);
       Optional<String> nextFire = ModelPropertyUtil.getNextFire(modelElementInstance);
       nextFireExpression = nextFire.map(SimulatorPlugin.getProcessEngineConfiguration().getExpressionManager()::createExpression);
-      activityIdToExpression.put(activity.getActivityId(), nextFireExpression);
+      activityIdToExpression.put(activityId, nextFireExpression);
       LOG.debug("Return new expression");
     } else {
       LOG.debug("Return cached expression");
