@@ -18,19 +18,25 @@ import org.slf4j.LoggerFactory;
 public class AbstractJobCreateListener {
   static final Logger LOG = LoggerFactory.getLogger(AbstractJobCreateListener.class);
 
-  private Map<String, Optional<Expression>> nextFireExpressionCache = new HashMap<>();
+  // process definition id -> activity id -> maybe expression
+  private Map<String, Map<String,Optional<Expression>>> nextFireExpressionCache = new HashMap<>();
 
   public AbstractJobCreateListener() {
     super();
   }
 
   protected Optional<Expression> getCachedNextFireExpression(ExecutionEntity execution, ActivityImpl activity) {
-    Optional<Expression> nextFireExpression = nextFireExpressionCache.get(activity.getActivityId());
+    Map<String, Optional<Expression>> activityIdToExpression = nextFireExpressionCache.get(execution.getProcessDefinitionId());
+    if (activityIdToExpression == null) {
+      activityIdToExpression = new HashMap<>();
+      nextFireExpressionCache.put(execution.getProcessDefinitionId(), activityIdToExpression);
+    }
+    Optional<Expression> nextFireExpression = activityIdToExpression.get(activity.getActivityId());
     if (nextFireExpression == null) {
       ModelElementInstance modelElementInstance = execution.getBpmnModelInstance().getModelElementById(activity.getActivityId());
       Optional<String> nextFire = ModelPropertyUtil.getNextFire(modelElementInstance);
       nextFireExpression = nextFire.map(SimulatorPlugin.getProcessEngineConfiguration().getExpressionManager()::createExpression);
-      nextFireExpressionCache.put(activity.getActivityId(), nextFireExpression);
+      activityIdToExpression.put(activity.getActivityId(), nextFireExpression);
       LOG.debug("Return new expression");
     } else {
       LOG.debug("Return cached expression");
