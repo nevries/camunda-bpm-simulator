@@ -5,12 +5,14 @@ import java.util.List;
 
 import org.camunda.bpm.engine.delegate.DelegateListener;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
+import org.camunda.bpm.engine.delegate.TaskListener;
 import org.camunda.bpm.engine.impl.bpmn.behavior.IntermediateThrowNoneEventActivityBehavior;
 import org.camunda.bpm.engine.impl.bpmn.behavior.TaskActivityBehavior;
 import org.camunda.bpm.engine.impl.bpmn.behavior.UserTaskActivityBehavior;
 import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParse;
 import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParseListener;
 import org.camunda.bpm.engine.impl.core.model.CoreModelElement;
+import org.camunda.bpm.engine.impl.persistence.entity.ExecutionEntity;
 import org.camunda.bpm.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.camunda.bpm.engine.impl.pvm.process.ActivityImpl;
 import org.camunda.bpm.engine.impl.pvm.process.ScopeImpl;
@@ -21,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SimulationParseListener implements BpmnParseListener {
-  
+
   private static final Logger LOG = LoggerFactory.getLogger(SimulationParseListener.class);
 
   public static class NoOpActivityBehavior extends TaskActivityBehavior {
@@ -103,9 +105,11 @@ public class SimulationParseListener implements BpmnParseListener {
     addPayloadGeneratingListener(activity);
 
     addEventSubscriptionJobCreatingListener(activity);
-    addUserTaskCompleteJobCreatingListener(activity);
 
     ((UserTaskActivityBehavior) activity.getActivityBehavior()).getTaskDefinition().getTaskListeners().clear();
+
+    addUserTaskCompleteJobCreatingListener(activity);
+
   }
 
   @Override
@@ -250,7 +254,8 @@ public class SimulationParseListener implements BpmnParseListener {
   }
 
   private void addUserTaskCompleteJobCreatingListener(ActivityImpl activity) {
-    // TODO Auto-generated method stub
+
+    ((UserTaskActivityBehavior) activity.getActivityBehavior()).getTaskDefinition().addTaskListener(TaskListener.EVENTNAME_CREATE, new UserTaskCompleteJobCreateListener(activity));
 
   }
 

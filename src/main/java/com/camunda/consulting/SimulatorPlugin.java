@@ -7,6 +7,7 @@ import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParseListener;
 import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
+import org.camunda.bpm.engine.impl.jobexecutor.JobHandler;
 
 public class SimulatorPlugin implements ProcessEnginePlugin {
 
@@ -30,8 +31,15 @@ public class SimulatorPlugin implements ProcessEnginePlugin {
       parseListeners = new ArrayList<>();
       processEngineConfiguration.setCustomPreBPMNParseListeners(parseListeners);
     }
-    
     parseListeners.add(new SimulationParseListener());
+
+    List<JobHandler> customJobHandlers = processEngineConfiguration.getCustomJobHandlers();
+    if(customJobHandlers == null){
+      customJobHandlers = new ArrayList<>();
+      processEngineConfiguration.setCustomJobHandlers(customJobHandlers);
+    }
+    customJobHandlers.add(new CompleteUserTaskJobHandler());
+
   }
 
   @Override
