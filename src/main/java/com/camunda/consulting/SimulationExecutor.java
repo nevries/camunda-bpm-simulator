@@ -1,24 +1,20 @@
 package com.camunda.consulting;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.Callable;
-
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.impl.Page;
 import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
-import org.camunda.bpm.engine.impl.cmd.AcquireJobsCmd;
-import org.camunda.bpm.engine.impl.context.Context;
 import org.camunda.bpm.engine.impl.interceptor.Command;
 import org.camunda.bpm.engine.impl.interceptor.CommandContext;
-import org.camunda.bpm.engine.impl.interceptor.CommandContextFactory;
 import org.camunda.bpm.engine.impl.interceptor.CommandExecutor;
 import org.camunda.bpm.engine.impl.persistence.entity.JobEntity;
 import org.camunda.bpm.engine.impl.util.ClockUtil;
 import org.camunda.bpm.engine.runtime.Job;
 import org.joda.time.DateTime;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 public class SimulationExecutor {
 
@@ -32,7 +28,7 @@ public class SimulationExecutor {
     CommandExecutor commandExecutor = processEngineConfigurationImpl.getCommandExecutorTxRequired();
 
     runWithPreparedEngineConfiguration(processEngineConfigurationImpl, processEngine, () -> {
-      // TODO have somting to create initial jobs for start events
+      // TODO have someting to create initial jobs for start events
       ClockUtil.setCurrentTime(start);
       DateTime lastMetricUpdate = null;
 

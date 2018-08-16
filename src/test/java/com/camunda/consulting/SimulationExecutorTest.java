@@ -15,8 +15,8 @@ import org.junit.Test;
 /**
  * Test case starting an in-memory database-backed Process Engine.
  */
-@Deployment(resources = "process.bpmn")
-public class InMemoryH2Test {
+@Deployment(resources = "executorTestModel.bpmn")
+public class SimulationExecutorTest {
 
   @Rule
   public ProcessEngineRule rule = new ProcessEngineRule(); 
