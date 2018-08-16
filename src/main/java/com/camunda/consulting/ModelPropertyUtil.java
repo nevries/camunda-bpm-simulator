@@ -14,7 +14,8 @@ import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 
 public class ModelPropertyUtil {
   
-  private static final String CAMUNDA_PROPERTY_SIM_NEXT_FIRE = "simNextFire";
+  public static final String CAMUNDA_PROPERTY_SIM_NEXT_FIRE = "simNextFire";
+  public static final String CAMUNDA_PROPERTY_SIM_GENERATE_PAYLOAD = "simGeneratePayload";
 
   public static Optional<String> getNextFire(ModelElementInstance elementInstance) {
     return readCamundaProperty((BaseElement)elementInstance, CAMUNDA_PROPERTY_SIM_NEXT_FIRE);

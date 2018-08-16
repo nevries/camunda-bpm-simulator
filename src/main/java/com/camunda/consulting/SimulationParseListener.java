@@ -72,7 +72,7 @@ public class SimulationParseListener implements BpmnParseListener {
     addPayloadGeneratingListener(activity);
 
     String type = serviceTaskElement.attributeNS(BpmnParse.CAMUNDA_BPMN_EXTENSIONS_NS, BpmnParse.TYPE);
-    if (type.equalsIgnoreCase("external")) {
+    if ("external".equalsIgnoreCase(type)) {
       addExternalTaskCompleteJobCreatingListener(activity);
 
       addFireEventJobCreatingListener(activity);
