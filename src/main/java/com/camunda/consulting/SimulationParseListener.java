@@ -71,7 +71,7 @@ public class SimulationParseListener implements BpmnParseListener {
     if (type.equalsIgnoreCase("external")) {
       addExternalTaskCompleteJobCreatingListener(activity);
 
-      addEventSubscriptionJobCreatingListener(activity);
+      addFireEventJobCreatingListener(activity);
     } else {
       // strip behavior for everything but external task
       activity.setActivityBehavior(new NoOpActivityBehavior());
@@ -103,7 +103,7 @@ public class SimulationParseListener implements BpmnParseListener {
   public void parseUserTask(Element userTaskElement, ScopeImpl scope, ActivityImpl activity) {
     addPayloadGeneratingListener(activity);
 
-    addEventSubscriptionJobCreatingListener(activity);
+    addFireEventJobCreatingListener(activity);
 
     ((UserTaskActivityBehavior) activity.getActivityBehavior()).getTaskDefinition().getTaskListeners().clear();
 
@@ -127,13 +127,13 @@ public class SimulationParseListener implements BpmnParseListener {
   @Override
   public void parseSubProcess(Element subProcessElement, ScopeImpl scope, ActivityImpl activity) {
     addPayloadGeneratingListener(activity);
-    addEventSubscriptionJobCreatingListener(activity);
+    addFireEventJobCreatingListener(activity);
   }
 
   @Override
   public void parseCallActivity(Element callActivityElement, ScopeImpl scope, ActivityImpl activity) {
     addPayloadGeneratingListener(activity);
-    addEventSubscriptionJobCreatingListener(activity);
+    addFireEventJobCreatingListener(activity);
   }
 
   @Override
@@ -166,7 +166,7 @@ public class SimulationParseListener implements BpmnParseListener {
   public void parseReceiveTask(Element receiveTaskElement, ScopeImpl scope, ActivityImpl activity) {
     addPayloadGeneratingListener(activity);
 
-    addEventSubscriptionJobCreatingListener(activity);
+    addFireEventJobCreatingListener(activity);
   }
 
   @Override
@@ -190,7 +190,7 @@ public class SimulationParseListener implements BpmnParseListener {
   public void parseTransaction(Element transactionElement, ScopeImpl scope, ActivityImpl activity) {
     addPayloadGeneratingListener(activity);
 
-    addEventSubscriptionJobCreatingListener(activity);
+    addFireEventJobCreatingListener(activity);
   }
 
   @Override
@@ -212,7 +212,7 @@ public class SimulationParseListener implements BpmnParseListener {
   public void parseIntermediateCatchEvent(Element intermediateEventElement, ScopeImpl scope, ActivityImpl activity) {
     addPayloadGeneratingListener(activity);
 
-    addEventSubscriptionJobCreatingListener(activity);
+    addFireEventJobCreatingListener(activity);
   }
 
   @Override
@@ -258,9 +258,9 @@ public class SimulationParseListener implements BpmnParseListener {
 
   }
 
-  private void addEventSubscriptionJobCreatingListener(ActivityImpl activity) {
+  private void addFireEventJobCreatingListener(ActivityImpl activity) {
     LOG.debug("Adding event subscription jobs to " + activity);
-    activity.addBuiltInListener(ExecutionListener.EVENTNAME_START, EventSubscriptionJobCreateListener.instance());
+    activity.addBuiltInListener(ExecutionListener.EVENTNAME_START, FireEventJobCreateListener.instance());
   }
 
   private void stripExecutionListeners(ProcessDefinitionEntity processDefinitionEntity) {
