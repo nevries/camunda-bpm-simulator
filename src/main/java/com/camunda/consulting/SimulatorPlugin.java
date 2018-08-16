@@ -3,6 +3,7 @@ package com.camunda.consulting;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.camunda.consulting.jobhandler.CompleteExternalTaskJobHandler;
 import com.camunda.consulting.jobhandler.CompleteUserTaskJobHandler;
 import com.camunda.consulting.jobhandler.FireEventJobHandler;
 import org.camunda.bpm.engine.ProcessEngine;
@@ -42,6 +43,7 @@ public class SimulatorPlugin implements ProcessEnginePlugin {
     }
     customJobHandlers.add(new CompleteUserTaskJobHandler());
     customJobHandlers.add(new FireEventJobHandler());
+    customJobHandlers.add(new CompleteExternalTaskJobHandler());
 
   }
 
