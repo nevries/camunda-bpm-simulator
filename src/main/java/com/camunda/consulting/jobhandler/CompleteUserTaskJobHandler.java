@@ -35,7 +35,7 @@ public class CompleteUserTaskJobHandler implements JobHandler<CompleteUserTaskJo
 
         final String taskId;
 
-        CompleteUserTaskJobHandlerConfiguration(String taskId) {
+        public CompleteUserTaskJobHandlerConfiguration(String taskId) {
             this.taskId = taskId;
         }
 

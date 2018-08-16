@@ -16,11 +16,11 @@ public class SimulatorPlugin implements ProcessEnginePlugin {
   private static ProcessEngineConfigurationImpl processEngineConfiguration;
   private static ProcessEngine processEngine;
 
-  protected static ProcessEngine getProcessEngine() {
+  public static ProcessEngine getProcessEngine() {
     return processEngine;
   }
 
-  protected static ProcessEngineConfigurationImpl getProcessEngineConfiguration() {
+  public static ProcessEngineConfigurationImpl getProcessEngineConfiguration() {
     return processEngineConfiguration;
   }
 
