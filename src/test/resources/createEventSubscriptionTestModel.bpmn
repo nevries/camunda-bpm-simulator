@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="1.16.0">
+  <bpmn:process id="createEventSubscription" isExecutable="true">
+    <bpmn:endEvent id="EndEventProcessEnded" name="Process&#10;ended">
+      <bpmn:incoming>SequenceFlow_0b64ugy</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow1" sourceRef="StartEventProcessStarted" targetRef="UT" />
+    <bpmn:startEvent id="StartEventProcessStarted" name="every hour">
+      <bpmn:outgoing>SequenceFlow1</bpmn:outgoing>
+      <bpmn:timerEventDefinition>
+        <bpmn:timeCycle xsi:type="bpmn:tFormalExpression">R/PT1H</bpmn:timeCycle>
+      </bpmn:timerEventDefinition>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_0b64ugy" sourceRef="UT" targetRef="EndEventProcessEnded" />
+    <bpmn:userTask id="UT" name="UT">
+      <bpmn:incoming>SequenceFlow1</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0b64ugy</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="BoundaryEvent_1edvqqe" name="M" cancelActivity="false" attachedToRef="UT">
+      <bpmn:extensionElements>
+        <camunda:properties>
+          <camunda:property name="simNextFire" value="PT1M" />
+        </camunda:properties>
+      </bpmn:extensionElements>
+      <bpmn:outgoing>SequenceFlow_09nqc1v</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="Message_186t8v1" />
+    </bpmn:boundaryEvent>
+    <bpmn:boundaryEvent id="BoundaryEvent_0h74wxe" name="S" cancelActivity="false" attachedToRef="UT">
+      <bpmn:extensionElements>
+        <camunda:properties>
+          <camunda:property name="simNextFire" value="PT2M" />
+        </camunda:properties>
+      </bpmn:extensionElements>
+      <bpmn:outgoing>SequenceFlow_12ij0hh</bpmn:outgoing>
+      <bpmn:signalEventDefinition signalRef="Signal_00llpqb" />
+    </bpmn:boundaryEvent>
+    <bpmn:boundaryEvent id="BoundaryEvent_1l0ihjs" name="45min" cancelActivity="false" attachedToRef="UT">
+      <bpmn:outgoing>SequenceFlow_1nv10sa</bpmn:outgoing>
+      <bpmn:timerEventDefinition>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT45M</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:endEvent id="timerFired" name="timerFired">
+      <bpmn:incoming>SequenceFlow_1nv10sa</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1nv10sa" sourceRef="BoundaryEvent_1l0ihjs" targetRef="timerFired" />
+    <bpmn:endEvent id="signalFired" name="signalFired">
+      <bpmn:incoming>SequenceFlow_12ij0hh</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_12ij0hh" sourceRef="BoundaryEvent_0h74wxe" targetRef="signalFired" />
+    <bpmn:endEvent id="messageFired" name="messageFired">
+      <bpmn:incoming>SequenceFlow_09nqc1v</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_09nqc1v" sourceRef="BoundaryEvent_1edvqqe" targetRef="messageFired" />
+  </bpmn:process>
+  <bpmn:message id="Message_186t8v1" name="M" />
+  <bpmn:signal id="Signal_00llpqb" name="S" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="createEventSubscription">
+      <bpmndi:BPMNShape id="EndEvent_0fkea3f_di" bpmnElement="EndEventProcessEnded">
+        <dc:Bounds x="561" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="559" y="138" width="40" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_08va5r8_di" bpmnElement="SequenceFlow1">
+        <di:waypoint x="209" y="120" />
+        <di:waypoint x="314" y="120" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="239" y="105" width="0" height="0" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StartEvent_1t85lid_di" bpmnElement="StartEventProcessStarted">
+        <dc:Bounds x="173" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="165" y="138" width="53" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0b64ugy_di" bpmnElement="SequenceFlow_0b64ugy">
+        <di:waypoint x="414" y="120" />
+        <di:waypoint x="561" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="UserTask_0jlsbvl_di" bpmnElement="UT">
+        <dc:Bounds x="314" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_06g084d_di" bpmnElement="BoundaryEvent_1edvqqe">
+        <dc:Bounds x="296" y="142" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="295" y="185" width="10" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_17a7c1u_di" bpmnElement="BoundaryEvent_0h74wxe">
+        <dc:Bounds x="348" y="142" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="343" y="186" width="8" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_0e3eem9_di" bpmnElement="BoundaryEvent_1l0ihjs">
+        <dc:Bounds x="396" y="142" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="437" y="173" width="30" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0m4j7sj_di" bpmnElement="timerFired">
+        <dc:Bounds x="482" y="222" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="475" y="265" width="50" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1nv10sa_di" bpmnElement="SequenceFlow_1nv10sa">
+        <di:waypoint x="414" y="178" />
+        <di:waypoint x="414" y="240" />
+        <di:waypoint x="482" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_0kbpnu9_di" bpmnElement="signalFired">
+        <dc:Bounds x="482" y="295" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="473" y="338" width="54" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_12ij0hh_di" bpmnElement="SequenceFlow_12ij0hh">
+        <di:waypoint x="366" y="178" />
+        <di:waypoint x="366" y="313" />
+        <di:waypoint x="482" y="313" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_0w07ibo_di" bpmnElement="messageFired">
+        <dc:Bounds x="482" y="375" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="465" y="418" width="70" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_09nqc1v_di" bpmnElement="SequenceFlow_09nqc1v">
+        <di:waypoint x="314" y="178" />
+        <di:waypoint x="314" y="393" />
+        <di:waypoint x="482" y="393" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -10,6 +10,8 @@ import org.camunda.bpm.engine.impl.persistence.entity.JobEntity;
 import org.camunda.bpm.engine.impl.util.ClockUtil;
 import org.camunda.bpm.engine.runtime.Job;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -17,6 +19,9 @@ import java.util.List;
 import java.util.Optional;
 
 public class SimulationExecutor {
+  
+  private static final Logger LOG = LoggerFactory.getLogger(SimulationExecutor.class);
+  
 
   // TODO make configurable
   public static final int METRIC_WRITE_INTERVAL_MINUTES = 15;
@@ -50,8 +55,6 @@ public class SimulationExecutor {
           job = jobs.stream().map(jobEntity -> (Job) jobEntity).findFirst();
           job.map(Job::getId).ifPresent(processEngine.getManagementService()::executeJob);
 
-          job.map(Object::toString).ifPresent(System.out::println);
-
           // write metrics from time to time
           if (lastMetricUpdate == null || lastMetricUpdate.plusMinutes(METRIC_WRITE_INTERVAL_MINUTES).isBefore(ClockUtil.getCurrentTime().getTime())) {
             lastMetricUpdate = new DateTime(ClockUtil.getCurrentTime().getTime());
@@ -64,7 +67,7 @@ public class SimulationExecutor {
         job = processEngine.getManagementService().createJobQuery().orderByJobDuedate().asc().listPage(0, 1).stream().findFirst();
         job.map(Job::getDuedate).ifPresent(ClockUtil::setCurrentTime);
 
-        System.out.println("Set time to: " + ClockUtil.getCurrentTime());
+        LOG.debug("Advance simulation time to: " + ClockUtil.getCurrentTime());
       } while (job.isPresent() && (job.get().getDuedate() == null || !job.get().getDuedate().after(end)));
     });
   }

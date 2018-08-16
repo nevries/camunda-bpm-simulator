@@ -12,7 +12,6 @@ import static org.camunda.bpm.engine.test.assertions.ProcessEngineAssertions.ass
 import static org.camunda.bpm.engine.test.assertions.ProcessEngineAssertions.init;
 import static org.camunda.bpm.engine.test.assertions.ProcessEngineTests.*;
 
-@Deployment(resources = "parseListenerTestModel.bpmn")
 public class SimulationParseListenerTest {
 
 
@@ -29,6 +28,7 @@ public class SimulationParseListenerTest {
     }
 
     @Test
+    @Deployment(resources = "parseListenerTestModel.bpmn")
     public void shouldStripListeners() {
 
         ProcessInstance processInstance = runtimeService().startProcessInstanceByKey("parseListenerTest");
@@ -44,6 +44,14 @@ public class SimulationParseListenerTest {
         // TODO: make the check better
         assertThat(historyService().createHistoricVariableInstanceQuery().count()).isEqualTo(4);
 
+    }
+    
+    @Test
+    @Deployment(resources = "createEventSubscriptionTestModel.bpmn")
+    public void createEventSubscriptionJob() {
+      ProcessInstance processInstance = runtimeService().startProcessInstanceByKey("createEventSubscription");
+      assertThat(processInstance).isStarted();
+      assertThat(processInstance).isWaitingAt("UT");
     }
 
 }

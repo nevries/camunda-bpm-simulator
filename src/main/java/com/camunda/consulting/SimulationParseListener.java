@@ -17,8 +17,12 @@ import org.camunda.bpm.engine.impl.pvm.process.ScopeImpl;
 import org.camunda.bpm.engine.impl.pvm.process.TransitionImpl;
 import org.camunda.bpm.engine.impl.util.xml.Element;
 import org.camunda.bpm.engine.impl.variable.VariableDeclaration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SimulationParseListener implements BpmnParseListener {
+  
+  private static final Logger LOG = LoggerFactory.getLogger(SimulationParseListener.class);
 
   public static class NoOpActivityBehavior extends TaskActivityBehavior {
 
@@ -66,7 +70,7 @@ public class SimulationParseListener implements BpmnParseListener {
     if (type.equalsIgnoreCase("external")) {
       addExternalTaskCompleteJobCreatingListener(activity);
 
-      addEventSubscriptionJobCreateListener(activity);
+      addEventSubscriptionJobCreatingListener(activity);
     } else {
       // strip behavior for everything but external task
       activity.setActivityBehavior(new NoOpActivityBehavior());
@@ -98,6 +102,7 @@ public class SimulationParseListener implements BpmnParseListener {
   public void parseUserTask(Element userTaskElement, ScopeImpl scope, ActivityImpl activity) {
     addPayloadGeneratingListener(activity);
 
+    addEventSubscriptionJobCreatingListener(activity);
     addUserTaskCompleteJobCreatingListener(activity);
 
     ((UserTaskActivityBehavior) activity.getActivityBehavior()).getTaskDefinition().getTaskListeners().clear();
@@ -119,13 +124,13 @@ public class SimulationParseListener implements BpmnParseListener {
   @Override
   public void parseSubProcess(Element subProcessElement, ScopeImpl scope, ActivityImpl activity) {
     addPayloadGeneratingListener(activity);
-    addEventSubscriptionJobCreateListener(activity);
+    addEventSubscriptionJobCreatingListener(activity);
   }
 
   @Override
   public void parseCallActivity(Element callActivityElement, ScopeImpl scope, ActivityImpl activity) {
     addPayloadGeneratingListener(activity);
-    addEventSubscriptionJobCreateListener(activity);
+    addEventSubscriptionJobCreatingListener(activity);
   }
 
   @Override
@@ -158,7 +163,7 @@ public class SimulationParseListener implements BpmnParseListener {
   public void parseReceiveTask(Element receiveTaskElement, ScopeImpl scope, ActivityImpl activity) {
     addPayloadGeneratingListener(activity);
 
-    addEventSubscriptionJobCreateListener(activity);
+    addEventSubscriptionJobCreatingListener(activity);
   }
 
   @Override
@@ -182,7 +187,7 @@ public class SimulationParseListener implements BpmnParseListener {
   public void parseTransaction(Element transactionElement, ScopeImpl scope, ActivityImpl activity) {
     addPayloadGeneratingListener(activity);
 
-    addEventSubscriptionJobCreateListener(activity);
+    addEventSubscriptionJobCreatingListener(activity);
   }
 
   @Override
@@ -204,7 +209,7 @@ public class SimulationParseListener implements BpmnParseListener {
   public void parseIntermediateCatchEvent(Element intermediateEventElement, ScopeImpl scope, ActivityImpl activity) {
     addPayloadGeneratingListener(activity);
 
-    addEventSubscriptionJobCreateListener(activity);
+    addEventSubscriptionJobCreatingListener(activity);
   }
 
   @Override
@@ -249,8 +254,9 @@ public class SimulationParseListener implements BpmnParseListener {
 
   }
 
-  private void addEventSubscriptionJobCreateListener(ActivityImpl activity) {
-    activity.addListener(ExecutionListener.EVENTNAME_START, EventSubscriptionJobCreateListener.instance());
+  private void addEventSubscriptionJobCreatingListener(ActivityImpl activity) {
+    LOG.debug("Adding event subscription jobs to " + activity);
+    activity.addBuiltInListener(ExecutionListener.EVENTNAME_START, EventSubscriptionJobCreateListener.instance());
   }
 
   private void stripExecutionListeners(ProcessDefinitionEntity processDefinitionEntity) {

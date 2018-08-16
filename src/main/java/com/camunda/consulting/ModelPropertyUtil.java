@@ -10,8 +10,16 @@ import java.util.stream.Stream;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaProperties;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaProperty;
+import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 
-public class Util {
+public class ModelPropertyUtil {
+  
+  private static final String CAMUNDA_PROPERTY_SIM_NEXT_FIRE = "simNextFire";
+
+  public static Optional<String> getNextFire(ModelElementInstance elementInstance) {
+    return readCamundaProperty((BaseElement)elementInstance, CAMUNDA_PROPERTY_SIM_NEXT_FIRE);
+  }
+  
   public static Optional<String> readCamundaProperty(BaseElement modelElementInstance, String propertyName) {
     if (modelElementInstance.getExtensionElements() == null) {
       return Optional.empty();
