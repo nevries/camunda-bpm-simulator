@@ -11,23 +11,42 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.math3.distribution.NormalDistribution;
 import org.camunda.bpm.engine.impl.util.ClockUtil;
 import org.camunda.bpm.engine.variable.Variables;
 import org.camunda.bpm.engine.variable.Variables.SerializationDataFormats;
 import org.camunda.bpm.engine.variable.value.FileValue;
 import org.camunda.bpm.engine.variable.value.TypedValue;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PayloadGenerator {
   private static Logger LOG = LoggerFactory.getLogger(PayloadGenerator.class);
 
+  private Map<String, NormalDistribution> normalDistributionRegistry = new HashMap<>();
+  
+  private NormalDistribution getNormalDistribution(String name, double mean, double standardDeviation) {
+    NormalDistribution normalDistribution = normalDistributionRegistry.get(name);
+    if (normalDistribution == null) {
+      normalDistribution = new NormalDistribution();
+      normalDistributionRegistry.put(name, normalDistribution);
+    }
+    if (mean != normalDistribution.getMean() || standardDeviation != normalDistribution.getStandardDeviation()) {
+      //throw new RuntimeException("You cannot use the sa)
+      //TODO
+    }
+    return normalDistribution;
+  }
+
   /**
-   * Treats null as false. Treats numbers to be true iff greater than 0. Treats strings to
-   * be true if their lower-case version equals "1", "true" or "yes". Anything
-   * unknown is treated as false.
+   * Treats null as false. Treats numbers to be true iff greater than 0. Treats
+   * strings to be true if their lower-case version equals "1", "true" or "yes".
+   * Anything unknown is treated as false.
    * 
    * @param o
    *          some object
@@ -273,8 +292,19 @@ public class PayloadGenerator {
   public Integer uniformInt(int min, int max) {
     return min + (int) Math.floor(((Math.random() * (max - min))));
   }
-  
+
+  /**
+   * Returns a normally distributed value around a mean value with standard
+   * deviation. A name of the distribution must be given to keep the state.
+   * 
+   * @param distributionName
+   * @param mean
+   * @param standardDeviation
+   * @return
+   */
   public Integer normalInt(String distributionName, int mean, int standardDeviation) {
+    getNormalDistribution(distributionName, mean, standardDeviation);
+    //TODO
     return null;
   }
 
@@ -432,4 +462,11 @@ public class PayloadGenerator {
     return (List<T>) listFromArray(new Object[] { o1, o2, o3, o4, o5, o6, o7, o8, o9 });
   }
 
+  public Date now() {
+    return ClockUtil.getCurrentTime();
+  }
+  
+  public Date nowPlusSeconds(int seconds) {
+    return new DateTime(ClockUtil.getCurrentTime().getTime()).plusSeconds(seconds).toDate();
+  }
 }
