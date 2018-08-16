@@ -28,11 +28,22 @@ public class UserTaskCompleteJobCreateListenerTest {
         init(rule.getProcessEngine());
     }
 
+
+    @Test
+    public void shouldNotCreateJobIfNoExpressionExists(){
+
+        ProcessInstance processInstance = runtimeService().startProcessInstanceByKey("userTaskComplete");
+        assertThat(processInstance).isStarted().isWaitingAt("Task_1");
+
+        assertThat(jobQuery().count()).isEqualTo(0);
+    }
+
     @Test
     public void shouldCreateCustomJob() {
 
-        ProcessInstance processInstance = runtimeService().startProcessInstanceByKey("userTaskComplete");
-        assertThat(processInstance).isStarted().isWaitingAt("Task_157nl2o");
+        ProcessInstance processInstance = runtimeService().createProcessInstanceByKey("userTaskComplete")
+                .startAfterActivity("Task_1").execute();
+        assertThat(processInstance).isStarted().isWaitingAt("Task_2");
 
         // Did we create a custom job?
         assertThat(jobQuery().count()).isEqualTo(1);
@@ -42,5 +53,6 @@ public class UserTaskCompleteJobCreateListenerTest {
         assertThat(jobHandlerConfig).isEqualTo(task().getId());
 
     }
+
 
 }
