@@ -52,6 +52,10 @@ public class SimulationParseListenerTest {
       ProcessInstance processInstance = runtimeService().startProcessInstanceByKey("createEventSubscription");
       assertThat(processInstance).isStarted();
       assertThat(processInstance).isWaitingAt("UT");
+      
+      ProcessInstance processInstance2 = runtimeService().startProcessInstanceByKey("createEventSubscription");
+      assertThat(processInstance2).isStarted();
+      assertThat(processInstance2).isWaitingAt("UT");
     }
 
 }

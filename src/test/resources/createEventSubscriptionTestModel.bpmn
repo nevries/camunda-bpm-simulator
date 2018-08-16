@@ -5,10 +5,10 @@
       <bpmn:incoming>SequenceFlow_0b64ugy</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow1" sourceRef="StartEventProcessStarted" targetRef="UT" />
-    <bpmn:startEvent id="StartEventProcessStarted" name="every hour">
+    <bpmn:startEvent id="StartEventProcessStarted" name="every 30m">
       <bpmn:outgoing>SequenceFlow1</bpmn:outgoing>
       <bpmn:timerEventDefinition>
-        <bpmn:timeCycle xsi:type="bpmn:tFormalExpression">R/PT1H</bpmn:timeCycle>
+        <bpmn:timeCycle xsi:type="bpmn:tFormalExpression">R/PT30M</bpmn:timeCycle>
       </bpmn:timerEventDefinition>
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="SequenceFlow_0b64ugy" sourceRef="UT" targetRef="EndEventProcessEnded" />
@@ -34,10 +34,10 @@
       <bpmn:outgoing>SequenceFlow_12ij0hh</bpmn:outgoing>
       <bpmn:signalEventDefinition signalRef="Signal_00llpqb" />
     </bpmn:boundaryEvent>
-    <bpmn:boundaryEvent id="BoundaryEvent_1l0ihjs" name="45min" cancelActivity="false" attachedToRef="UT">
+    <bpmn:boundaryEvent id="BoundaryEvent_1l0ihjs" name="25min" cancelActivity="false" attachedToRef="UT">
       <bpmn:outgoing>SequenceFlow_1nv10sa</bpmn:outgoing>
       <bpmn:timerEventDefinition>
-        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT45M</bpmn:timeDuration>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT25M</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:boundaryEvent>
     <bpmn:endEvent id="timerFired" name="timerFired">
@@ -73,7 +73,7 @@
       <bpmndi:BPMNShape id="StartEvent_1t85lid_di" bpmnElement="StartEventProcessStarted">
         <dc:Bounds x="173" y="102" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="165" y="138" width="53" height="14" />
+          <dc:Bounds x="166" y="138" width="52" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0b64ugy_di" bpmnElement="SequenceFlow_0b64ugy">

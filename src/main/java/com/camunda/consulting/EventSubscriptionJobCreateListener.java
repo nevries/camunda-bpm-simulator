@@ -1,5 +1,7 @@
 package com.camunda.consulting;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -17,6 +19,7 @@ public class EventSubscriptionJobCreateListener implements ExecutionListener {
   private static final Logger LOG = LoggerFactory.getLogger(EventSubscriptionJobCreateListener.class);
 
   private static EventSubscriptionJobCreateListener INSTANCE = null;
+  private Map<String, Optional<Expression>> nextFireExpressionCache = new HashMap<>();
 
   public static EventSubscriptionJobCreateListener instance() {
     if (INSTANCE == null) {
@@ -36,23 +39,33 @@ public class EventSubscriptionJobCreateListener implements ExecutionListener {
 
   private void createEventSubscriptionJob(EventSubscriptionEntity eventSubscription) {
     LOG.debug("creating job for " + eventSubscription.getActivityId());
-    
+
     ExecutionEntity execution = eventSubscription.getExecution();
     ActivityImpl activity = eventSubscription.getActivity();
 
-    ModelElementInstance modelElementInstance = execution.getBpmnModelInstance().getModelElementById(activity.getActivityId());
-    Optional<String> nextFire = ModelPropertyUtil.getNextFire(modelElementInstance);
+    Optional<Expression> nextFireExpression = getCachedNextFireExpression(execution, activity);
 
-    // no property set, no simulation
-    if (!nextFire.isPresent()) {
+    if (!nextFireExpression.isPresent()) {
       return;
     }
 
-    Expression nextFireExpression = SimulatorPlugin.getProcessEngineConfiguration().getExpressionManager().createExpression(nextFire.get());
-
     // TODO
-    System.err.println("Create job for " + eventSubscription.getEventType() + " with time expression " + nextFire + " which evaluates to "
-        + nextFireExpression.getValue(execution));
+    System.err.println(
+        "Create job for " + eventSubscription.getEventType() + " with time expression that evaluates to " + nextFireExpression.get().getValue(execution));
 
+  }
+
+  private Optional<Expression> getCachedNextFireExpression(ExecutionEntity execution, ActivityImpl activity) {
+    Optional<Expression> nextFireExpression = nextFireExpressionCache.get(activity.getActivityId());
+    if (nextFireExpression == null) {
+      ModelElementInstance modelElementInstance = execution.getBpmnModelInstance().getModelElementById(activity.getActivityId());
+      Optional<String> nextFire = ModelPropertyUtil.getNextFire(modelElementInstance);
+      nextFireExpression = nextFire.map(SimulatorPlugin.getProcessEngineConfiguration().getExpressionManager()::createExpression);
+      nextFireExpressionCache.put(activity.getActivityId(), nextFireExpression);
+      LOG.debug("Return new expression");
+    } else {
+      LOG.debug("Return cached expression");
+    }
+    return nextFireExpression;
   }
 }
