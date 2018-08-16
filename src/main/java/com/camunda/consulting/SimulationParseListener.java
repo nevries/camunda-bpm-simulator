@@ -2,6 +2,7 @@ package com.camunda.consulting;
 
 import java.util.List;
 
+import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.camunda.bpm.engine.impl.bpmn.behavior.IntermediateThrowNoneEventActivityBehavior;
 import org.camunda.bpm.engine.impl.bpmn.behavior.TaskActivityBehavior;
 import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParse;
@@ -28,7 +29,7 @@ public class SimulationParseListener implements BpmnParseListener {
   public void parseStartEvent(Element startEventElement, ScopeImpl scope, ActivityImpl startEventActivity) {
     stripListeners(startEventActivity);
     addPayloadGeneratingListener(startEventActivity);
-    
+
     // TODO: create some fancy job
   }
 
@@ -265,8 +266,7 @@ public class SimulationParseListener implements BpmnParseListener {
   }
 
   private void addEventSubscriptionJobCreateListener(ActivityImpl activity) {
-    // TODO Auto-generated method stub
-
+    activity.getListeners().get(ExecutionListener.EVENTNAME_START).add(EventSubscriptionJobCreateListener.instance());
   }
 
   private void stripListeners(ActivityImpl startEventActivity) {
