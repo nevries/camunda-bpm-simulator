@@ -1,15 +1,19 @@
 package com.camunda.consulting;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
+import org.camunda.bpm.engine.impl.context.Context;
 import org.camunda.bpm.engine.impl.el.Expression;
 import org.camunda.bpm.engine.impl.event.EventType;
 import org.camunda.bpm.engine.impl.persistence.entity.EventSubscriptionEntity;
 import org.camunda.bpm.engine.impl.persistence.entity.ExecutionEntity;
+import org.camunda.bpm.engine.impl.persistence.entity.ProcessDefinitionEntity;
+import org.camunda.bpm.engine.impl.persistence.entity.TimerEntity;
 import org.camunda.bpm.engine.impl.pvm.process.ActivityImpl;
 import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import org.slf4j.Logger;
@@ -45,14 +49,24 @@ public class EventSubscriptionJobCreateListener implements ExecutionListener {
 
     Optional<Expression> nextFireExpression = getCachedNextFireExpression(execution, activity);
 
+    // no job if no configuration - fair enough
     if (!nextFireExpression.isPresent()) {
       return;
     }
 
-    // TODO
-    System.err.println(
-        "Create job for " + eventSubscription.getEventType() + " with time expression that evaluates to " + nextFireExpression.get().getValue(execution));
+    // create job
+    TimerEntity timer = new TimerEntity();
+    ProcessDefinitionEntity processDefinition = execution.getProcessDefinition();
 
+    timer.setExecution(execution);
+    timer.setDuedate((Date) nextFireExpression.get().getValue(execution));
+    timer.setJobHandlerType(FireEventJobHandler.TYPE);
+    timer.setProcessDefinitionKey(processDefinition.getKey());
+    timer.setDeploymentId(processDefinition.getDeploymentId());
+    timer.setJobHandlerConfiguration(
+        new FireEventJobHandler.FireEventJobHandlerConfiguration(eventSubscription.getEventType(), eventSubscription.getEventName()));
+
+    Context.getCommandContext().getJobManager().schedule(timer);
   }
 
   private Optional<Expression> getCachedNextFireExpression(ExecutionEntity execution, ActivityImpl activity) {

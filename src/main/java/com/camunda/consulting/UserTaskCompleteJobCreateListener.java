@@ -38,7 +38,7 @@ public class UserTaskCompleteJobCreateListener implements TaskListener{
         timer.setDeploymentId(processDefinition.getDeploymentId());
         timer.setJobHandlerConfiguration(new CompleteUserTaskJobHandler.CompleteUserTaskJobHandlerConfiguration(task.getId()));
 
-        Context.getCommandContext().getJobManager().schedule(timer);
+        //Context.getCommandContext().getJobManager().schedule(timer);
     }
 
 }

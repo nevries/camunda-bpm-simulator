@@ -39,6 +39,7 @@ public class SimulatorPlugin implements ProcessEnginePlugin {
       processEngineConfiguration.setCustomJobHandlers(customJobHandlers);
     }
     customJobHandlers.add(new CompleteUserTaskJobHandler());
+    customJobHandlers.add(new FireEventJobHandler());
 
   }
 

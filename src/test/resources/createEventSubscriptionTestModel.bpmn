@@ -5,12 +5,6 @@
       <bpmn:incoming>SequenceFlow_0b64ugy</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow1" sourceRef="StartEventProcessStarted" targetRef="UT" />
-    <bpmn:startEvent id="StartEventProcessStarted" name="every 30m">
-      <bpmn:outgoing>SequenceFlow1</bpmn:outgoing>
-      <bpmn:timerEventDefinition>
-        <bpmn:timeCycle xsi:type="bpmn:tFormalExpression">R/PT30M</bpmn:timeCycle>
-      </bpmn:timerEventDefinition>
-    </bpmn:startEvent>
     <bpmn:sequenceFlow id="SequenceFlow_0b64ugy" sourceRef="UT" targetRef="EndEventProcessEnded" />
     <bpmn:userTask id="UT" name="UT">
       <bpmn:incoming>SequenceFlow1</bpmn:incoming>
@@ -19,7 +13,7 @@
     <bpmn:boundaryEvent id="BoundaryEvent_1edvqqe" name="M" cancelActivity="false" attachedToRef="UT">
       <bpmn:extensionElements>
         <camunda:properties>
-          <camunda:property name="simNextFire" value="PT1M" />
+          <camunda:property name="simNextFire" value="${testPayloadGenerator.inMinutes(1)}" />
         </camunda:properties>
       </bpmn:extensionElements>
       <bpmn:outgoing>SequenceFlow_09nqc1v</bpmn:outgoing>
@@ -28,16 +22,16 @@
     <bpmn:boundaryEvent id="BoundaryEvent_0h74wxe" name="S" cancelActivity="false" attachedToRef="UT">
       <bpmn:extensionElements>
         <camunda:properties>
-          <camunda:property name="simNextFire" value="PT2M" />
+          <camunda:property name="simNextFire" value="${testPayloadGenerator.inMinutes(2)}" />
         </camunda:properties>
       </bpmn:extensionElements>
       <bpmn:outgoing>SequenceFlow_12ij0hh</bpmn:outgoing>
       <bpmn:signalEventDefinition signalRef="Signal_00llpqb" />
     </bpmn:boundaryEvent>
-    <bpmn:boundaryEvent id="BoundaryEvent_1l0ihjs" name="25min" cancelActivity="false" attachedToRef="UT">
+    <bpmn:boundaryEvent id="BoundaryEvent_1l0ihjs" name="3min" cancelActivity="false" attachedToRef="UT">
       <bpmn:outgoing>SequenceFlow_1nv10sa</bpmn:outgoing>
       <bpmn:timerEventDefinition>
-        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT25M</bpmn:timeDuration>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT3M</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:boundaryEvent>
     <bpmn:endEvent id="timerFired" name="timerFired">
@@ -52,6 +46,17 @@
       <bpmn:incoming>SequenceFlow_09nqc1v</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_09nqc1v" sourceRef="BoundaryEvent_1edvqqe" targetRef="messageFired" />
+    <bpmn:startEvent id="StartEventProcessStarted">
+      <bpmn:outgoing>SequenceFlow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:textAnnotation id="TextAnnotation_09gqc12">
+      <bpmn:text>1 min</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_0x7d1ed" sourceRef="BoundaryEvent_1edvqqe" targetRef="TextAnnotation_09gqc12" />
+    <bpmn:textAnnotation id="TextAnnotation_159gxbf">
+      <bpmn:text>2 min</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_07rly9v" sourceRef="BoundaryEvent_0h74wxe" targetRef="TextAnnotation_159gxbf" />
   </bpmn:process>
   <bpmn:message id="Message_186t8v1" name="M" />
   <bpmn:signal id="Signal_00llpqb" name="S" />
@@ -70,12 +75,6 @@
           <dc:Bounds x="239" y="105" width="0" height="0" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="StartEvent_1t85lid_di" bpmnElement="StartEventProcessStarted">
-        <dc:Bounds x="173" y="102" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="166" y="138" width="52" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0b64ugy_di" bpmnElement="SequenceFlow_0b64ugy">
         <di:waypoint x="414" y="120" />
         <di:waypoint x="561" y="120" />
@@ -98,7 +97,7 @@
       <bpmndi:BPMNShape id="BoundaryEvent_0e3eem9_di" bpmnElement="BoundaryEvent_1l0ihjs">
         <dc:Bounds x="396" y="142" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="437" y="173" width="30" height="14" />
+          <dc:Bounds x="440" y="173" width="24" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_0m4j7sj_di" bpmnElement="timerFired">
@@ -134,6 +133,26 @@
         <di:waypoint x="314" y="393" />
         <di:waypoint x="482" y="393" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_09gqc12_di" bpmnElement="TextAnnotation_09gqc12">
+        <dc:Bounds x="197" y="207" width="51" height="29" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_0x7d1ed_di" bpmnElement="Association_0x7d1ed">
+        <di:waypoint x="299" y="170" />
+        <di:waypoint x="245" y="207" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_159gxbf_di" bpmnElement="TextAnnotation_159gxbf">
+        <dc:Bounds x="319" y="207" width="50" height="30" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_07rly9v_di" bpmnElement="Association_07rly9v">
+        <di:waypoint x="360" y="177" />
+        <di:waypoint x="349" y="207" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StartEvent_0r9et7k_di" bpmnElement="StartEventProcessStarted">
+        <dc:Bounds x="173" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="166" y="138" width="52" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
