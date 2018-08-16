@@ -13,14 +13,14 @@ import org.camunda.bpm.engine.impl.pvm.process.ActivityImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EventSubscriptionJobCreateListener extends AbstractJobCreateListener implements ExecutionListener {
-  static final Logger LOG = LoggerFactory.getLogger(EventSubscriptionJobCreateListener.class);
+public class FireEventJobCreateListener extends AbstractJobCreateListener implements ExecutionListener {
+  static final Logger LOG = LoggerFactory.getLogger(FireEventJobCreateListener.class);
 
-  private static EventSubscriptionJobCreateListener INSTANCE = null;
+  private static FireEventJobCreateListener INSTANCE = null;
 
-  public static EventSubscriptionJobCreateListener instance() {
+  public static FireEventJobCreateListener instance() {
     if (INSTANCE == null) {
-      INSTANCE = new EventSubscriptionJobCreateListener();
+      INSTANCE = new FireEventJobCreateListener();
     }
     return INSTANCE;
   }
