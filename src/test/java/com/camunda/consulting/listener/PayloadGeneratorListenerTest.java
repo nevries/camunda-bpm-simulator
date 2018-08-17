@@ -1,9 +1,7 @@
 package com.camunda.consulting.listener;
 
 import com.camunda.consulting.PayloadGenerator;
-import com.camunda.consulting.TestPayloadGenerator;
 import org.apache.ibatis.logging.LogFactory;
-import org.camunda.bpm.engine.impl.persistence.entity.JobEntity;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.test.Deployment;
 import org.camunda.bpm.engine.test.ProcessEngineRule;
@@ -14,7 +12,7 @@ import org.junit.Test;
 
 import static org.camunda.bpm.engine.test.assertions.ProcessEngineAssertions.assertThat;
 import static org.camunda.bpm.engine.test.assertions.ProcessEngineAssertions.init;
-import static org.camunda.bpm.engine.test.assertions.ProcessEngineTests.*;
+import static org.camunda.bpm.engine.test.assertions.ProcessEngineTests.runtimeService;
 
 @Deployment(resources = "payloadGeneratorTestModel.bpmn")
 public class PayloadGeneratorListenerTest {

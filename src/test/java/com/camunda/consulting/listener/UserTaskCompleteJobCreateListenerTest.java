@@ -1,6 +1,6 @@
 package com.camunda.consulting.listener;
 
-import com.camunda.consulting.TestPayloadGenerator;
+import com.camunda.consulting.PayloadGenerator;
 import org.apache.ibatis.logging.LogFactory;
 import org.camunda.bpm.engine.impl.persistence.entity.JobEntity;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
@@ -28,7 +28,7 @@ public class UserTaskCompleteJobCreateListenerTest {
     @Before
     public void setup() {
         init(rule.getProcessEngine());
-      Mocks.register("testPayloadGenerator", new TestPayloadGenerator());
+      Mocks.register("testPayloadGenerator", new PayloadGenerator());
 
     }
 

@@ -25,7 +25,7 @@ public class SimulationParseListenerTest {
   @Before
   public void setup() {
     init(rule.getProcessEngine());
-    Mocks.register("testPayloadGenerator", new TestPayloadGenerator());
+    Mocks.register("generator", new PayloadGenerator());
   }
 
   @Test
