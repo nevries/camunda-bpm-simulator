@@ -43,6 +43,19 @@ public class FireEventJobHandlerTest {
     assertThat(processInstance).hasPassedInOrder("messageFired", "signalFired", "timerFired");
 
   }
+  
+  @Deployment(resources = "eventbasedGatewayTestModel.bpmn")
+  @Test
+  public void shouldFireMessageNotSignal() {
+
+    ProcessInstance processInstance = runtimeService().startProcessInstanceByKey("eventbasedGateway");
+    assertThat(processInstance).isStarted();
+
+    SimulationExecutor.execute(DateTime.now().toDate(), DateTime.now().plusHours(1).toDate());
+
+    assertThat(processInstance).hasPassed("reach_me").hasNotPassed("miss_me");
+
+  }
 
   @Deployment(resources = "eventSubProcessModel.bpmn")
   @Test

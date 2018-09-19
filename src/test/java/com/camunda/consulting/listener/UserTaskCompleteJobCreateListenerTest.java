@@ -28,7 +28,7 @@ public class UserTaskCompleteJobCreateListenerTest {
     @Before
     public void setup() {
         init(rule.getProcessEngine());
-      Mocks.register("testPayloadGenerator", new PayloadGenerator());
+      Mocks.register("generator", new PayloadGenerator());
 
     }
 

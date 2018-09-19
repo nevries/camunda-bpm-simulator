@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.camunda.consulting.ModelPropertyUtil;
 import com.camunda.consulting.SimulatorPlugin;
 
-public class PayloadGeneratorListener extends AbstractJobCreateListener implements ExecutionListener {
+public class PayloadGeneratorListener extends AbstractTimerJobCreator implements ExecutionListener {
   static final Logger LOG = LoggerFactory.getLogger(PayloadGeneratorListener.class);
 
   private static PayloadGeneratorListener INSTANCE = null;

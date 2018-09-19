@@ -27,7 +27,7 @@ public class SimulationExecutor {
   public static final int METRIC_WRITE_INTERVAL_MINUTES = 15;
 
   public static void execute(Date start, Date end) {
-
+    
     ProcessEngineConfigurationImpl processEngineConfigurationImpl = SimulatorPlugin.getProcessEngineConfiguration();
     ProcessEngine processEngine = SimulatorPlugin.getProcessEngine();
     CommandExecutor commandExecutor = processEngineConfigurationImpl.getCommandExecutorTxRequired();

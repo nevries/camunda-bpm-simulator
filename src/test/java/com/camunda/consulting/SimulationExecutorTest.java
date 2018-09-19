@@ -19,7 +19,7 @@ import org.junit.Test;
 public class SimulationExecutorTest {
 
   @Rule
-  public ProcessEngineRule rule = new ProcessEngineRule(); 
+  public ProcessEngineRule rule = new ProcessEngineRule();
 
   static {
     LogFactory.useSlf4jLogging(); // MyBatis
@@ -32,10 +32,10 @@ public class SimulationExecutorTest {
 
   @Test
   public void testBasicCycleStart() {
-	  SimulationExecutor.execute(DateTime.now().plusHours(1).toDate(), DateTime.now().plusHours(2).toDate());
-	  
-	  long count = historyService().createHistoricProcessInstanceQuery().processDefinitionKey("oneStartPerMinute").completed().count();
-	  assertThat(count).isEqualTo(61);
+    SimulationExecutor.execute(DateTime.now().plusHours(1).toDate(), DateTime.now().plusHours(2).toDate());
+
+    long count = historyService().createHistoricProcessInstanceQuery().processDefinitionKey("oneStartPerMinute").completed().count();
+    assertThat(count).isEqualTo(61);
   }
 
 }

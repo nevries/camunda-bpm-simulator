@@ -1,15 +1,16 @@
 package com.camunda.consulting.listener;
 
-import com.camunda.consulting.jobhandler.CompleteUserTaskJobHandler;
+import java.util.Date;
+import java.util.Optional;
+
 import org.camunda.bpm.engine.delegate.DelegateTask;
 import org.camunda.bpm.engine.delegate.TaskListener;
 import org.camunda.bpm.engine.impl.el.Expression;
 import org.camunda.bpm.engine.impl.persistence.entity.ExecutionEntity;
 
-import java.util.Date;
-import java.util.Optional;
+import com.camunda.consulting.jobhandler.CompleteUserTaskJobHandler;
 
-public class UserTaskCompleteJobCreateListener extends AbstractJobCreateListener implements TaskListener{
+public class UserTaskCompleteJobCreateListener extends AbstractTimerJobCreator implements TaskListener {
 
   private static UserTaskCompleteJobCreateListener INSTANCE = null;
 
@@ -21,23 +22,24 @@ public class UserTaskCompleteJobCreateListener extends AbstractJobCreateListener
   }
 
   @Override
-    public void notify(DelegateTask task) {
+  public void notify(DelegateTask task) {
 
-      Optional<Expression> nextFireExpression = getCachedNextFireExpression(task.getExecution(), task.getTaskDefinitionKey());
+    Optional<Expression> nextFireExpression = getCachedNextFireExpression(task.getExecution(), task.getTaskDefinitionKey());
 
-      if(nextFireExpression.isPresent()) {
-            Date dueDate = (Date) nextFireExpression.get().getValue(task.getExecution());
-            createJobForUserTaskCompletion(task, dueDate);
-        }
+    if (nextFireExpression.isPresent()) {
+      Date dueDate = (Date) nextFireExpression.get().getValue(task.getExecution());
+      createJobForUserTaskCompletion(task, dueDate);
     }
+  }
 
-    private void createJobForUserTaskCompletion(DelegateTask task, Date dueDate) {
+  private void createJobForUserTaskCompletion(DelegateTask task, Date dueDate) {
 
-      String jobHandlertype = CompleteUserTaskJobHandler.TYPE;
-      CompleteUserTaskJobHandler.CompleteUserTaskJobHandlerConfiguration jobHandlerConfiguration = new CompleteUserTaskJobHandler.CompleteUserTaskJobHandlerConfiguration(task.getId());
+    String jobHandlertype = CompleteUserTaskJobHandler.TYPE;
+    CompleteUserTaskJobHandler.CompleteUserTaskJobHandlerConfiguration jobHandlerConfiguration = new CompleteUserTaskJobHandler.CompleteUserTaskJobHandlerConfiguration(
+        task.getId());
 
-      createTimerJob((ExecutionEntity)task.getExecution(), jobHandlertype, dueDate, jobHandlerConfiguration);
+    createTimerJob((ExecutionEntity) task.getExecution(), jobHandlertype, dueDate, jobHandlerConfiguration);
 
-    }
+  }
 
 }

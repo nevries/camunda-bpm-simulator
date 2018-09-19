@@ -1,9 +1,8 @@
 package com.camunda.consulting;
 
-import com.camunda.consulting.listener.ExternalTaskJobCreateListener;
-import com.camunda.consulting.listener.FireEventJobCreateListener;
-import com.camunda.consulting.listener.PayloadGeneratorListener;
-import com.camunda.consulting.listener.UserTaskCompleteJobCreateListener;
+import java.util.Iterator;
+import java.util.List;
+
 import org.camunda.bpm.engine.delegate.DelegateListener;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.camunda.bpm.engine.delegate.TaskListener;
@@ -22,9 +21,11 @@ import org.camunda.bpm.engine.impl.variable.VariableDeclaration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Iterator;
-import java.util.List;
+import com.camunda.consulting.listener.ExternalTaskJobCreateListener;
+import com.camunda.consulting.listener.PayloadGeneratorListener;
+import com.camunda.consulting.listener.UserTaskCompleteJobCreateListener;
 
+@SuppressWarnings("deprecation")
 public class SimulationParseListener implements BpmnParseListener {
 
   private static final Logger LOG = LoggerFactory.getLogger(SimulationParseListener.class);
@@ -263,7 +264,7 @@ public class SimulationParseListener implements BpmnParseListener {
 
   private void addFireEventJobCreatingListener(ActivityImpl activity) {
     LOG.debug("Adding event subscription jobs to " + activity);
-    activity.addBuiltInListener(ExecutionListener.EVENTNAME_START, FireEventJobCreateListener.instance());
+    //activity.addBuiltInListener(ExecutionListener.EVENTNAME_START, FireEventJobCreateListener.instance());
   }
 
   private void stripExecutionListeners(ProcessDefinitionEntity processDefinitionEntity) {

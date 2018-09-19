@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.camunda.consulting.ModelPropertyUtil;
-import com.camunda.consulting.SimulatorPlugin;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.impl.context.Context;
 import org.camunda.bpm.engine.impl.el.Expression;
@@ -14,18 +12,20 @@ import org.camunda.bpm.engine.impl.jobexecutor.JobHandlerConfiguration;
 import org.camunda.bpm.engine.impl.persistence.entity.ExecutionEntity;
 import org.camunda.bpm.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.camunda.bpm.engine.impl.persistence.entity.TimerEntity;
-import org.camunda.bpm.engine.impl.pvm.process.ActivityImpl;
 import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AbstractJobCreateListener {
-  static final Logger LOG = LoggerFactory.getLogger(AbstractJobCreateListener.class);
+import com.camunda.consulting.ModelPropertyUtil;
+import com.camunda.consulting.SimulatorPlugin;
+
+public class AbstractTimerJobCreator {
+  static final Logger LOG = LoggerFactory.getLogger(AbstractTimerJobCreator.class);
 
   // process definition id -> activity id -> maybe expression
   private Map<String, Map<String, Optional<Expression>>> nextFireExpressionCache = new HashMap<>();
 
-  public AbstractJobCreateListener() {
+  public AbstractTimerJobCreator() {
     super();
   }
 
@@ -61,5 +61,4 @@ public class AbstractJobCreateListener {
 
     Context.getCommandContext().getJobManager().schedule(timer);
   }
-
 }

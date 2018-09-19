@@ -10,6 +10,7 @@ import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParseListener;
 import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
+import org.camunda.bpm.engine.impl.interceptor.CommandInterceptor;
 import org.camunda.bpm.engine.impl.jobexecutor.JobHandler;
 
 public class SimulatorPlugin implements ProcessEnginePlugin {
@@ -45,6 +46,12 @@ public class SimulatorPlugin implements ProcessEnginePlugin {
     customJobHandlers.add(new FireEventJobHandler());
     customJobHandlers.add(new CompleteExternalTaskJobHandler());
 
+    List<CommandInterceptor> postCommandInterceptors = processEngineConfiguration.getCustomPostCommandInterceptorsTxRequired();
+    if (postCommandInterceptors == null) {
+      postCommandInterceptors = new ArrayList<>();
+      processEngineConfiguration.setCustomPostCommandInterceptorsTxRequired(postCommandInterceptors);
+    }
+    postCommandInterceptors.add(new CreateFireEventJobCommandInterceptor());
   }
 
   @Override
