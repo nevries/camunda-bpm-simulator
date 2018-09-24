@@ -2,12 +2,19 @@ package com.camunda.consulting;
 
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.impl.Page;
+import org.camunda.bpm.engine.impl.ProcessDefinitionQueryImpl;
+import org.camunda.bpm.engine.impl.bpmn.deployer.BpmnDeployer;
 import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
+import org.camunda.bpm.engine.impl.context.Context;
 import org.camunda.bpm.engine.impl.interceptor.Command;
 import org.camunda.bpm.engine.impl.interceptor.CommandContext;
 import org.camunda.bpm.engine.impl.interceptor.CommandExecutor;
+import org.camunda.bpm.engine.impl.jobexecutor.TimerStartEventJobHandler;
+import org.camunda.bpm.engine.impl.persistence.entity.JobDefinitionEntity;
 import org.camunda.bpm.engine.impl.persistence.entity.JobEntity;
+import org.camunda.bpm.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.camunda.bpm.engine.impl.util.ClockUtil;
+import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.runtime.Job;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -17,25 +24,27 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class SimulationExecutor {
-  
+
   private static final Logger LOG = LoggerFactory.getLogger(SimulationExecutor.class);
-  
 
   // TODO make configurable
   public static final int METRIC_WRITE_INTERVAL_MINUTES = 15;
 
   public static void execute(Date start, Date end) {
-    
+
     ProcessEngineConfigurationImpl processEngineConfigurationImpl = SimulatorPlugin.getProcessEngineConfiguration();
     ProcessEngine processEngine = SimulatorPlugin.getProcessEngine();
     CommandExecutor commandExecutor = processEngineConfigurationImpl.getCommandExecutorTxRequired();
 
-    runWithPreparedEngineConfiguration(processEngineConfigurationImpl, processEngine, () -> {
-      // TODO have someting to create initial jobs for start events
+    runWithPreparedEngineConfiguration(processEngineConfigurationImpl, commandExecutor, () -> {
+
       ClockUtil.setCurrentTime(start);
       DateTime lastMetricUpdate = null;
+
+      updateStartTimersForCurrentTime(commandExecutor);
 
       Optional<Job> job;
       do {
@@ -72,7 +81,7 @@ public class SimulationExecutor {
     });
   }
 
-  private static void runWithPreparedEngineConfiguration(ProcessEngineConfigurationImpl processEngineConfigurationImpl, ProcessEngine processEngine,
+  private static void runWithPreparedEngineConfiguration(ProcessEngineConfigurationImpl processEngineConfigurationImpl, CommandExecutor commandExecutor,
       Runnable runnable) {
 
     boolean metrics = processEngineConfigurationImpl.isMetricsEnabled() && processEngineConfigurationImpl.isDbMetricsReporterActivate();
@@ -102,7 +111,7 @@ public class SimulationExecutor {
         processEngineConfigurationImpl.getDbMetricsReporter().reportNow();
 
         processEngineConfigurationImpl.getDbMetricsReporter()
-            .setReporterId(processEngineConfigurationImpl.getMetricsReporterIdProvider().provideId(processEngine));
+            .setReporterId(processEngineConfigurationImpl.getMetricsReporterIdProvider().provideId(processEngineConfigurationImpl.getProcessEngine()));
       }
       processEngineConfigurationImpl.setJobExecutorAcquireByPriority(jobExecutorAcquireByPriority);
       processEngineConfigurationImpl.setJobExecutorPreferTimerJobs(jobExecutorPreferTimerJobs);
@@ -110,7 +119,30 @@ public class SimulationExecutor {
       if (jobExecutorEnabled) {
         processEngineConfigurationImpl.getJobExecutor().start();
       }
+      updateStartTimersForCurrentTime(commandExecutor);
     }
+  }
+
+  private static void updateStartTimersForCurrentTime(CommandExecutor commandExecutor) {
+    commandExecutor.execute(new Command<Void>() {
+      @Override
+      public Void execute(CommandContext commandContext) {
+        List<ProcessDefinition> list = new ProcessDefinitionQueryImpl(commandExecutor).executeList(commandContext, null);
+        list.stream().map(ProcessDefinition::getKey).collect(Collectors.toSet()).forEach(key -> {
+          ProcessDefinitionEntity definition = commandContext.getProcessEngineConfiguration().getDeploymentCache()
+              .findDeployedLatestProcessDefinitionByKey(key);
+
+          new BpmnDeployer() {
+            public void updateStartTimers(ProcessDefinitionEntity processDefinition) {
+              removeObsoleteTimers(processDefinition);
+              addTimerDeclarations(processDefinition);
+            }
+          }.updateStartTimers(definition);
+
+        });
+        return null;
+      }
+    });
   }
 
   private static void makeTimeGoBy() {
