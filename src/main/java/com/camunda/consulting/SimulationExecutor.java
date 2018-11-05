@@ -1,16 +1,23 @@
 package com.camunda.consulting;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.impl.Page;
 import org.camunda.bpm.engine.impl.ProcessDefinitionQueryImpl;
 import org.camunda.bpm.engine.impl.bpmn.deployer.BpmnDeployer;
 import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
-import org.camunda.bpm.engine.impl.context.Context;
 import org.camunda.bpm.engine.impl.interceptor.Command;
 import org.camunda.bpm.engine.impl.interceptor.CommandContext;
 import org.camunda.bpm.engine.impl.interceptor.CommandExecutor;
-import org.camunda.bpm.engine.impl.jobexecutor.TimerStartEventJobHandler;
-import org.camunda.bpm.engine.impl.persistence.entity.JobDefinitionEntity;
 import org.camunda.bpm.engine.impl.persistence.entity.JobEntity;
 import org.camunda.bpm.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.camunda.bpm.engine.impl.util.ClockUtil;
@@ -20,17 +27,12 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 public class SimulationExecutor {
 
   private static final Logger LOG = LoggerFactory.getLogger(SimulationExecutor.class);
 
   // TODO make configurable
+  public static final int THREADS = 4;
   public static final int METRIC_WRITE_INTERVAL_MINUTES = 15;
 
   public static void execute(Date start, Date end) {
@@ -46,9 +48,12 @@ public class SimulationExecutor {
 
       updateStartTimersForCurrentTime(commandExecutor);
 
-      Optional<Job> job;
+      ThreadPoolExecutor executor = new ThreadPoolExecutor(THREADS, THREADS, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(1));
+
+      boolean noMoreJobs = false;
       do {
         // execute all jobs that are due before current time
+        int done = 0;
         do {
           // work around engine "bug"
           makeTimeGoBy();
@@ -58,26 +63,42 @@ public class SimulationExecutor {
           List<JobEntity> jobs = commandExecutor.execute(new Command<List<JobEntity>>() {
             @Override
             public List<JobEntity> execute(CommandContext commandContext) {
-              return commandContext.getJobManager().findNextJobsToExecute(new Page(0, 1));
+              return commandContext.getJobManager().findNextJobsToExecute(new Page(0, THREADS));
             }
           });
-          job = jobs.stream().map(jobEntity -> (Job) jobEntity).findFirst();
-          job.map(Job::getId).ifPresent(processEngine.getManagementService()::executeJob);
+
+          List<String> todo = jobs.stream().filter(job -> job.getDuedate() == null || !job.getDuedate().after(end)).map(jobEntity -> ((Job) jobEntity).getId())
+              .collect(Collectors.toList());
+          todo.stream().forEach(jobId -> {
+            Runnable run = () -> processEngine.getManagementService().executeJob(jobId);
+            try {
+              executor.submit(run);
+            } catch (RejectedExecutionException e) {
+              // try to put on queue
+              try {
+                executor.getQueue().offer(run, 1, TimeUnit.SECONDS);
+              } catch (InterruptedException e1) {
+                throw new RuntimeException("Could not start simulating job", e1);
+              }
+            }
+          });
+          done = todo.size();
 
           // write metrics from time to time
           if (lastMetricUpdate == null || lastMetricUpdate.plusMinutes(METRIC_WRITE_INTERVAL_MINUTES).isBefore(ClockUtil.getCurrentTime().getTime())) {
             lastMetricUpdate = new DateTime(ClockUtil.getCurrentTime().getTime());
             processEngineConfigurationImpl.getDbMetricsReporter().reportNow();
           }
-        } while (job.isPresent() && (job.get().getDuedate() == null || !job.get().getDuedate().after(end)));
+        } while (done > 0);
 
         // get the next job that is due after current time and adjust clock to
         // its due date
-        job = processEngine.getManagementService().createJobQuery().orderByJobDuedate().asc().listPage(0, 1).stream().findFirst();
-        job.map(Job::getDuedate).ifPresent(ClockUtil::setCurrentTime);
+        Optional<Job> nextJob = processEngine.getManagementService().createJobQuery().orderByJobDuedate().asc().listPage(0, 1).stream().filter(job -> job.getDuedate() == null || !job.getDuedate().after(end)).findFirst();
+        noMoreJobs = !nextJob.isPresent();
+        nextJob.map(Job::getDuedate).ifPresent(ClockUtil::setCurrentTime);
 
         LOG.debug("Advance simulation time to: " + ClockUtil.getCurrentTime());
-      } while (job.isPresent() && (job.get().getDuedate() == null || !job.get().getDuedate().after(end)));
+      } while (!noMoreJobs);
     });
   }
 
