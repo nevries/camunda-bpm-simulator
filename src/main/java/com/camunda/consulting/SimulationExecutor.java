@@ -1,16 +1,18 @@
 package com.camunda.consulting;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.impl.Page;
 import org.camunda.bpm.engine.impl.ProcessDefinitionQueryImpl;
-import org.camunda.bpm.engine.impl.bpmn.deployer.BpmnDeployer;
 import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
-import org.camunda.bpm.engine.impl.context.Context;
 import org.camunda.bpm.engine.impl.interceptor.Command;
 import org.camunda.bpm.engine.impl.interceptor.CommandContext;
 import org.camunda.bpm.engine.impl.interceptor.CommandExecutor;
-import org.camunda.bpm.engine.impl.jobexecutor.TimerStartEventJobHandler;
-import org.camunda.bpm.engine.impl.persistence.entity.JobDefinitionEntity;
 import org.camunda.bpm.engine.impl.persistence.entity.JobEntity;
 import org.camunda.bpm.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.camunda.bpm.engine.impl.util.ClockUtil;
@@ -19,12 +21,6 @@ import org.camunda.bpm.engine.runtime.Job;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class SimulationExecutor {
 
@@ -132,12 +128,7 @@ public class SimulationExecutor {
           ProcessDefinitionEntity definition = commandContext.getProcessEngineConfiguration().getDeploymentCache()
               .findDeployedLatestProcessDefinitionByKey(key);
 
-          new BpmnDeployer() {
-            public void updateStartTimers(ProcessDefinitionEntity processDefinition) {
-              removeObsoleteTimers(processDefinition);
-              addTimerDeclarations(processDefinition);
-            }
-          }.updateStartTimers(definition);
+          SimulatorPlugin.getBpmnDeployer().adjustStartEventSubscriptions(definition, definition);
 
         });
         return null;

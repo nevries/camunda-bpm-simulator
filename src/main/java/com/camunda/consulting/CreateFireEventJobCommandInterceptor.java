@@ -43,6 +43,10 @@ public class CreateFireEventJobCommandInterceptor extends CommandInterceptor {
 
   class FireEventJobCreator extends AbstractTimerJobCreator {
     public void checkTimerExpressionAndCreateJob(EventSubscriptionEntity eventSubscription) {
+      // we only want to have timers for events an execution is waiting for = not start events
+      if (eventSubscription.getExecution() == null) {
+        return;
+      }
       LOG.debug("creating job for " + eventSubscription.getActivityId());
       
       ExecutionEntity execution = eventSubscription.getExecution();

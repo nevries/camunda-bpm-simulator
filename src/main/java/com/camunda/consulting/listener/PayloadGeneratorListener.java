@@ -31,14 +31,14 @@ public class PayloadGeneratorListener extends AbstractTimerJobCreator implements
 
   @Override
   public void notify(DelegateExecution execution) throws Exception {
-    Work[] workList = getGeneratePayloadValuesOrdered(execution.getBpmnModelElementInstance());
+    Work[] workList = getGeneratePayloadValuesOrdered(execution.getBpmnModelElementInstance(), ModelPropertyUtil.CAMUNDA_PROPERTY_SIM_GENERATE_PAYLOAD);
 
     for (Work work : workList) {
 
       LOG.debug("Setting variable with name evaluated from '{}' to value evaluated from '{}'", work.variableExpression, work.valueExpression);
 
-      String variableName = work.variableExpression.getValue(execution).toString().trim();
-      Object value = work.valueExpression.getValue(execution);
+      String variableName = work.getVariableExpression().getValue(execution).toString().trim();
+      Object value = work.getValueExpression().getValue(execution);
 
       LOG.debug("Setting variable '{}' to '{}'", variableName, value);
 
@@ -49,11 +49,10 @@ public class PayloadGeneratorListener extends AbstractTimerJobCreator implements
   /*
    * Cached read of "simulateSetVariable"-extensions for the given element.
    */
-  private static Work[] getGeneratePayloadValuesOrdered(BaseElement element) {
+  public static Work[] getGeneratePayloadValuesOrdered(BaseElement element, String camundaPropertyName) {
     Work[] values = generatePayloadPropertyCache.get(element);
     if (values == null) {
-      String[] expressions = ModelPropertyUtil.readCamundaPropertyMulti(element, ModelPropertyUtil.CAMUNDA_PROPERTY_SIM_GENERATE_PAYLOAD)
-          .toArray(new String[] {});
+      String[] expressions = ModelPropertyUtil.readCamundaPropertyMulti(element, camundaPropertyName).toArray(new String[] {});
       values = new Work[expressions.length];
 
       DirectedAcyclicGraph<Work, Object> graph = new DirectedAcyclicGraph<>(Object.class);
@@ -83,9 +82,9 @@ public class PayloadGeneratorListener extends AbstractTimerJobCreator implements
     return values;
   }
 
-  static class Work {
-    Expression variableExpression;
-    Expression valueExpression;
+  public static class Work {
+    private Expression variableExpression;
+    private Expression valueExpression;
 
     public Work(String setVariableValue) {
       String[] split = setVariableValue.split("=", 2);
@@ -96,6 +95,14 @@ public class PayloadGeneratorListener extends AbstractTimerJobCreator implements
 
       variableExpression = SimulatorPlugin.getProcessEngineConfiguration().getExpressionManager().createExpression(split[0]);
       valueExpression = SimulatorPlugin.getProcessEngineConfiguration().getExpressionManager().createExpression(split[1]);
+    }
+    
+    public Expression getVariableExpression() {
+      return variableExpression;
+    }
+    
+    public Expression getValueExpression() {
+      return valueExpression;
     }
   }
 }

@@ -1,14 +1,21 @@
 package com.camunda.consulting;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
+import org.camunda.bpm.engine.ActivityTypes;
 import org.camunda.bpm.engine.delegate.DelegateListener;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.camunda.bpm.engine.delegate.TaskListener;
 import org.camunda.bpm.engine.impl.bpmn.behavior.IntermediateThrowNoneEventActivityBehavior;
 import org.camunda.bpm.engine.impl.bpmn.behavior.TaskActivityBehavior;
 import org.camunda.bpm.engine.impl.bpmn.behavior.UserTaskActivityBehavior;
+import org.camunda.bpm.engine.impl.bpmn.helper.BpmnProperties;
 import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParse;
 import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParseListener;
 import org.camunda.bpm.engine.impl.core.model.CoreModelElement;
@@ -29,6 +36,7 @@ import com.camunda.consulting.listener.UserTaskCompleteJobCreateListener;
 public class SimulationParseListener implements BpmnParseListener {
 
   private static final Logger LOG = LoggerFactory.getLogger(SimulationParseListener.class);
+  public static final String PROPERTYNAME_SIMULATE_START_EVENT = "simulateStartEvent";
 
   public static class NoOpActivityBehavior extends TaskActivityBehavior {
 
@@ -43,7 +51,25 @@ public class SimulationParseListener implements BpmnParseListener {
   public void parseStartEvent(Element startEventElement, ScopeImpl scope, ActivityImpl startEventActivity) {
     addPayloadGeneratingListener(startEventActivity);
 
-    // TODO: create some fancy job
+    if (scope instanceof ProcessDefinitionEntity) {
+      // only create simulating timers for none, conditional, message and signal
+      // start events
+      final String activityType = startEventActivity.getProperties().get(BpmnProperties.TYPE);
+      if (Arrays.asList(new String[] { ActivityTypes.START_EVENT, ActivityTypes.START_EVENT_CONDITIONAL, ActivityTypes.START_EVENT_MESSAGE,
+          ActivityTypes.START_EVENT_SIGNAL }).contains(activityType)) {
+        Optional<String> simNextFire = ModelPropertyUtil.getNextFire(startEventElement);
+        if (simNextFire.isPresent()) {
+          LOG.debug("Adding simulating start timer for start event " + startEventElement.attribute("id"));
+          @SuppressWarnings("unchecked")
+          Map<String, String> map = (Map<String, String>) scope.getProperty(PROPERTYNAME_SIMULATE_START_EVENT);
+          if (map == null) {
+            map = new HashMap<>();
+            scope.setProperty(PROPERTYNAME_SIMULATE_START_EVENT, map);
+          }
+          map.put(startEventActivity.getActivityId(), simNextFire.get());
+        }
+      }
+    }
   }
 
   @Override
@@ -258,13 +284,15 @@ public class SimulationParseListener implements BpmnParseListener {
 
   private void addUserTaskCompleteJobCreatingListener(ActivityImpl activity) {
 
-    ((UserTaskActivityBehavior) activity.getActivityBehavior()).getTaskDefinition().addTaskListener(TaskListener.EVENTNAME_CREATE, UserTaskCompleteJobCreateListener.instance());
+    ((UserTaskActivityBehavior) activity.getActivityBehavior()).getTaskDefinition().addTaskListener(TaskListener.EVENTNAME_CREATE,
+        UserTaskCompleteJobCreateListener.instance());
 
   }
 
   private void addFireEventJobCreatingListener(ActivityImpl activity) {
     LOG.debug("Adding event subscription jobs to " + activity);
-    //activity.addBuiltInListener(ExecutionListener.EVENTNAME_START, FireEventJobCreateListener.instance());
+    // activity.addBuiltInListener(ExecutionListener.EVENTNAME_START,
+    // FireEventJobCreateListener.instance());
   }
 
   private void stripExecutionListeners(ProcessDefinitionEntity processDefinitionEntity) {
