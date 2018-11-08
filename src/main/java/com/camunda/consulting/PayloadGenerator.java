@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.camunda.bpm.engine.impl.util.ClockUtil;
@@ -38,18 +39,20 @@ public class PayloadGenerator {
       normalDistributionRegistry.put(name, normalDistribution);
     }
     if (mean != normalDistribution.getMean() || standardDeviation != normalDistribution.getStandardDeviation()) {
-      throw new RuntimeException("You cannot create two normal distribution with the same name (and different mean and deviation).");
+      throw new RuntimeException("You cannot create two normal distribution with the same name (and different mean and deviation): " + name);
     }
     return normalDistribution;
   }
 
-  private NormalDistribution getNormalDistribution(String name) {
-    NormalDistribution normalDistribution = normalDistributionRegistry.get(name);
-    if (normalDistribution == null) {
-      throw new RuntimeException("You have to create a normal distribution first with mean and deviation.");
-    }
-    return normalDistribution;
-  }
+  // private NormalDistribution getNormalDistribution(String name) {
+  // NormalDistribution normalDistribution =
+  // normalDistributionRegistry.get(name);
+  // if (normalDistribution == null) {
+  // throw new RuntimeException("You have to create a normal distribution first
+  // with mean and deviation.");
+  // }
+  // return normalDistribution;
+  // }
 
   /**
    * Treats null as false. Treats numbers to be true iff greater than 0. Treats
@@ -344,6 +347,10 @@ public class PayloadGenerator {
     return Math.random() < 0.5;
   }
 
+  public Boolean uniformBooleanByProbability(double probability) {
+    return Math.random() < probability;
+  }
+
   public FileValue smallPdf(String name) {
     try (InputStream data = getClass().getResourceAsStream("/mockument.pdf");) {
       return Variables.fileValue(name.toLowerCase().endsWith(".pdf") ? name : name + ".pdf").mimeType("application/pdf").file(data).create();
@@ -559,5 +566,51 @@ public class PayloadGenerator {
 
   public Date nowPlusPeriod(Period period) {
     return new DateTime(ClockUtil.getCurrentTime().getTime()).plus(period).toDate();
+  }
+
+  /**
+   * Calculates the next time based on current time such that consecutive
+   * calling of this function provides approximately 'times' results per day
+   * between 'morning' and 'evening'.
+   * 
+   * @param uniqueName
+   *          To identify the distribution used
+   * @param morning
+   *          in format 'hh:mm'
+   * @param evening
+   *          in format 'hh:mm'
+   * @param times
+   * @return
+   */
+  public Date timesPerDay(String uniqueName, String morning, String evening, long times) {
+    // TODO: WTF
+    List<Integer> morningParts = Arrays.stream(morning.split(":")).map(Integer::parseInt).collect(Collectors.toList());
+    List<Integer> eveningParts = Arrays.stream(evening.split(":")).map(Integer::parseInt).collect(Collectors.toList());
+    long interval = ((eveningParts.get(0) * 60 * 60 * 1000 + eveningParts.get(1) * 60 * 1000)
+        - (morningParts.get(0) * 60 * 60 * 1000 + morningParts.get(1) * 60 * 1000)) / (times + 1);
+
+    DateTime newTime = new DateTime(ClockUtil.getCurrentTime().getTime()).plusMillis(normal(uniqueName + interval, interval, interval / 3).intValue());
+
+    DateTime endOfCurrentDay = new DateTime(ClockUtil.getCurrentTime().getTime()).withTimeAtStartOfDay().plusHours(eveningParts.get(0))
+        .plusMinutes(eveningParts.get(1));
+    if (newTime.isAfter(endOfCurrentDay)) {
+      newTime = new DateTime(ClockUtil.getCurrentTime().getTime()).plusDays(1).withTimeAtStartOfDay().plusHours(morningParts.get(0))
+          .plusMinutes(morningParts.get(1));
+    }
+
+    return newTime.toDate();
+  }
+
+  /**
+   * Returns an integer that linearly increases from start to end of a history
+   * simulation between min and max. If no history simulation is running, always
+   * max is returned.
+   * 
+   * @param min
+   * @param max
+   * @return
+   */
+  public Integer linearBySimulationTime(int min, int max) {
+    return min + (int) (SimulationExecutor.getProgress() * (max - min));
   }
 }

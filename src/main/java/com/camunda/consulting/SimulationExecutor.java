@@ -29,7 +29,7 @@ public class SimulationExecutor {
   // TODO make configurable
   public static final int METRIC_WRITE_INTERVAL_MINUTES = 15;
 
-  private static double progress;
+  private static double progress = 1;
 
   public static double getProgress() {
     return progress;
@@ -111,6 +111,7 @@ public class SimulationExecutor {
       runnable.run();
     } finally {
       ClockUtil.reset();
+      progress = 1;
       if (metrics) {
         processEngineConfigurationImpl.getDbMetricsReporter().reportNow();
 
