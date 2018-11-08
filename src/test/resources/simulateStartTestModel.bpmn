@@ -2,21 +2,40 @@
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="2.0.0">
   <bpmn:process id="oneStartPerMinute" isExecutable="true">
     <bpmn:endEvent id="EndEventProcessEnded" name="Process&#10;ended">
-      <bpmn:incoming>SequenceFlow1</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_04v9yd2</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="SequenceFlow1" sourceRef="StartEventProcessStarted" targetRef="EndEventProcessEnded" />
+    <bpmn:sequenceFlow id="SequenceFlow1" sourceRef="StartEventProcessStarted" targetRef="ExclusiveGateway_1ov6exr" />
     <bpmn:startEvent id="StartEventProcessStarted" name="Process&#10;started" camunda:asyncAfter="true">
       <bpmn:extensionElements>
         <camunda:properties>
           <camunda:property name="simNextFire" value="${generator.nowPlusMinutes(1)}" />
-          <camunda:property name="simInitBusinessKey" value="${generator.uniqueNumber().toString()}" />
+          <camunda:property name="simInitBusinessKey" value="none_${generator.uniqueNumber().toString()}" />
           <camunda:property name="simInitPayload" value="second=2" />
           <camunda:property name="simInitPayload" value="first=${generator.toInt(1)}" />
         </camunda:properties>
       </bpmn:extensionElements>
       <bpmn:outgoing>SequenceFlow1</bpmn:outgoing>
     </bpmn:startEvent>
+    <bpmn:startEvent id="StartEvent_10rhj5x">
+      <bpmn:extensionElements>
+        <camunda:properties>
+          <camunda:property name="simNextFire" value="${generator.nowPlusMinutes(2)}" />
+          <camunda:property name="simInitBusinessKey" value="message_${generator.uniqueNumber()}" />
+          <camunda:property name="simInitPayload" value="third=message" />
+        </camunda:properties>
+      </bpmn:extensionElements>
+      <bpmn:outgoing>SequenceFlow_11k87hj</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="Message_0xyxygm" />
+    </bpmn:startEvent>
+    <bpmn:exclusiveGateway id="ExclusiveGateway_1ov6exr">
+      <bpmn:incoming>SequenceFlow1</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_11k87hj</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_04v9yd2</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow_04v9yd2" sourceRef="ExclusiveGateway_1ov6exr" targetRef="EndEventProcessEnded" />
+    <bpmn:sequenceFlow id="SequenceFlow_11k87hj" sourceRef="StartEvent_10rhj5x" targetRef="ExclusiveGateway_1ov6exr" />
   </bpmn:process>
+  <bpmn:message id="Message_0xyxygm" name="Message_3hqdn28" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="oneStartPerMinute">
       <bpmndi:BPMNShape id="EndEvent_0fkea3f_di" bpmnElement="EndEventProcessEnded">
@@ -27,7 +46,7 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_08va5r8_di" bpmnElement="SequenceFlow1">
         <di:waypoint x="209" y="120" />
-        <di:waypoint x="428" y="120" />
+        <di:waypoint x="290" y="120" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="239" y="105" width="0" height="0" />
         </bpmndi:BPMNLabel>
@@ -38,6 +57,20 @@
           <dc:Bounds x="171" y="138" width="40" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_1e3c5rm_di" bpmnElement="StartEvent_10rhj5x">
+        <dc:Bounds x="297" y="180" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_1ov6exr_di" bpmnElement="ExclusiveGateway_1ov6exr" isMarkerVisible="true">
+        <dc:Bounds x="290" y="95" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_04v9yd2_di" bpmnElement="SequenceFlow_04v9yd2">
+        <di:waypoint x="340" y="120" />
+        <di:waypoint x="428" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_11k87hj_di" bpmnElement="SequenceFlow_11k87hj">
+        <di:waypoint x="315" y="180" />
+        <di:waypoint x="315" y="145" />
+      </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
