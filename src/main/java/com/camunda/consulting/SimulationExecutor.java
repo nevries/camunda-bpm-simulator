@@ -29,6 +29,12 @@ public class SimulationExecutor {
   // TODO make configurable
   public static final int METRIC_WRITE_INTERVAL_MINUTES = 15;
 
+  private static double progress;
+
+  public static double getProgress() {
+    return progress;
+  }
+
   public static void execute(Date start, Date end) {
 
     ProcessEngineConfigurationImpl processEngineConfigurationImpl = SimulatorPlugin.getProcessEngineConfiguration();
@@ -38,6 +44,7 @@ public class SimulationExecutor {
     runWithPreparedEngineConfiguration(processEngineConfigurationImpl, commandExecutor, () -> {
 
       ClockUtil.setCurrentTime(start);
+      progress = 0;
       DateTime lastMetricUpdate = null;
 
       updateStartTimersForCurrentTime(commandExecutor);
@@ -71,6 +78,7 @@ public class SimulationExecutor {
         // its due date
         job = processEngine.getManagementService().createJobQuery().orderByJobDuedate().asc().listPage(0, 1).stream().findFirst();
         job.map(Job::getDuedate).ifPresent(ClockUtil::setCurrentTime);
+        progress = Math.min(1, (ClockUtil.getCurrentTime().getTime() - start.getTime()) / (double) (end.getTime() - start.getTime()));
 
         LOG.debug("Advance simulation time to: " + ClockUtil.getCurrentTime());
       } while (job.isPresent() && (job.get().getDuedate() == null || !job.get().getDuedate().after(end)));
