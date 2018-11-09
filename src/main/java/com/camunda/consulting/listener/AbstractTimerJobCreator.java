@@ -16,8 +16,9 @@ import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.camunda.consulting.ModelPropertyUtil;
 import com.camunda.consulting.SimulatorPlugin;
+
+import simulationproperty.ModelPropertyUtil;
 
 public class AbstractTimerJobCreator {
   static final Logger LOG = LoggerFactory.getLogger(AbstractTimerJobCreator.class);

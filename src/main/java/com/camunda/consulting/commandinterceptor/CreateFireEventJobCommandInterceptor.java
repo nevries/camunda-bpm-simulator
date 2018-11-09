@@ -1,4 +1,4 @@
-package com.camunda.consulting;
+package com.camunda.consulting.commandinterceptor;
 
 import java.util.Date;
 import java.util.Optional;

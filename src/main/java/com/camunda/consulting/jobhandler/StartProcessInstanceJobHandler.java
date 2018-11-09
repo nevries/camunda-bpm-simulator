@@ -20,10 +20,10 @@ import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.camunda.consulting.ModelPropertyUtil;
 import com.camunda.consulting.SimulatorPlugin;
-import com.camunda.consulting.listener.PayloadGeneratorListener;
-import com.camunda.consulting.listener.PayloadGeneratorListener.Work;
+
+import simulationproperty.ModelPropertyUtil;
+import simulationproperty.Work;
 
 public class StartProcessInstanceJobHandler implements JobHandler<StartProcessInstanceJobHandler.StartProcessInstanceJobConfiguration> {
   private static final Logger LOG = LoggerFactory.getLogger(StartProcessInstanceJobHandler.class);
@@ -48,13 +48,14 @@ public class StartProcessInstanceJobHandler implements JobHandler<StartProcessIn
 
     // prepare business key
     String businessKey = null;
-    Optional<String> simInitBusinessKey = ModelPropertyUtil.readCamundaProperty((BaseElement) startEvent, "simInitBusinessKey");
+    Optional<String> simInitBusinessKey = ModelPropertyUtil.readCamundaProperty((BaseElement) startEvent,
+        ModelPropertyUtil.CAMUNDA_PROPERTY_SIM_INIT_BUSINESS_KEY);
     if (simInitBusinessKey.isPresent()) {
       businessKey = SimulatorPlugin.evaluateExpression(simInitBusinessKey.get(), scope).toString();
     }
 
     // prepare variables
-    Work[] workList = PayloadGeneratorListener.getGeneratePayloadValuesOrdered((BaseElement) startEvent, "simInitPayload");
+    Work[] workList = ModelPropertyUtil.getPayloadValuesOrdered((BaseElement) startEvent, ModelPropertyUtil.CAMUNDA_PROPERTY_SIM_INIT_PAYLOAD);
     Map<String, Object> variables = new HashMap<>(workList.length);
     for (Work work : workList) {
       LOG.debug("Setting initial variable with name evaluated from '{}' to value evaluated from '{}'", work.getVariableExpression(), work.getValueExpression());

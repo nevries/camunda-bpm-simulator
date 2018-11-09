@@ -14,10 +14,13 @@ import org.camunda.bpm.engine.impl.jobexecutor.JobHandler;
 import org.camunda.bpm.engine.impl.persistence.deploy.Deployer;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
+import com.camunda.consulting.commandinterceptor.CreateFireEventJobCommandInterceptor;
 import com.camunda.consulting.jobhandler.CompleteExternalTaskJobHandler;
 import com.camunda.consulting.jobhandler.CompleteUserTaskJobHandler;
 import com.camunda.consulting.jobhandler.FireEventJobHandler;
 import com.camunda.consulting.jobhandler.StartProcessInstanceJobHandler;
+import com.camunda.consulting.modding.SimulatingBpmnDeployer;
+import com.camunda.consulting.modding.SimulationParseListener;
 
 public class SimulatorPlugin implements ProcessEnginePlugin {
 
