@@ -17,7 +17,7 @@ public class CamundaApplication {
   public static void main(String... args) {
     SpringApplication.run(CamundaApplication.class, args);
 
-    SimulationExecutor.execute(DateTime.now().minusYears(1).toDate(), DateTime.now().toDate());
+    SimulationExecutor.execute(DateTime.now().minusMonths(1).toDate(), DateTime.now().toDate());
   }
 
   @Bean

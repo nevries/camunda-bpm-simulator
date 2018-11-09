@@ -10,4 +10,15 @@
 		<module>plugin</module>
 		<module>example</module>
 	</modules>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>camunda-nexus</id>
+			<url>https://app.camunda.com/nexus/content/repositories/camunda-consulting-snapshots/</url>
+		</snapshotRepository>
+		<repository>
+			<id>camunda-nexus</id>
+			<url>https://app.camunda.com/nexus/content/repositories/camunda-consulting/</url>
+		</repository>
+	</distributionManagement>
 </project>
