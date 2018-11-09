@@ -11,6 +11,13 @@
 		<module>example</module>
 	</modules>
 
+	<scm>
+		<url>https://github.com/camunda-consulting/camunda-bpm-simulator</url>
+		<connection>scm:git:git@github.com:camunda-consulting/camunda-bpm-simulator.git</connection>
+		<developerConnection>scm:git:git@github.com:camunda-consulting/camunda-bpm-simulator.git</developerConnection>
+		<tag>HEAD</tag>
+	</scm>
+
 	<distributionManagement>
 		<snapshotRepository>
 			<id>camunda-nexus</id>
