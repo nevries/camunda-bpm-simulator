@@ -1,4 +1,4 @@
-package com.camunda.consulting.listener;
+package com.camunda.consulting.simulator.listener;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -16,7 +16,7 @@ import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.camunda.consulting.SimulatorPlugin;
+import com.camunda.consulting.simulator.SimulatorPlugin;
 
 import simulationproperty.ModelPropertyUtil;
 

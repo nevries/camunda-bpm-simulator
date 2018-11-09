@@ -1,4 +1,4 @@
-package com.camunda.consulting;
+package com.camunda.consulting.simulator;
 
 import java.io.BufferedReader;
 import java.io.IOException;

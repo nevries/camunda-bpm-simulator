@@ -2,7 +2,7 @@ package simulationproperty;
 
 import org.camunda.bpm.engine.impl.el.Expression;
 
-import com.camunda.consulting.SimulatorPlugin;
+import com.camunda.consulting.simulator.SimulatorPlugin;
 
 public class Work {
   Expression variableExpression;

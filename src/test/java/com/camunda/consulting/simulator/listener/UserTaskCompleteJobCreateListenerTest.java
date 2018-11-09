@@ -1,6 +1,5 @@
-package com.camunda.consulting.listener;
+package com.camunda.consulting.simulator.listener;
 
-import com.camunda.consulting.PayloadGenerator;
 import org.apache.ibatis.logging.LogFactory;
 import org.camunda.bpm.engine.impl.persistence.entity.JobEntity;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
@@ -10,6 +9,8 @@ import org.camunda.bpm.engine.test.mock.Mocks;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+
+import com.camunda.consulting.simulator.PayloadGenerator;
 
 import static org.camunda.bpm.engine.test.assertions.ProcessEngineAssertions.assertThat;
 import static org.camunda.bpm.engine.test.assertions.ProcessEngineAssertions.init;

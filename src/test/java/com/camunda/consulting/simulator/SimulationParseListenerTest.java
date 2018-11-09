@@ -1,4 +1,4 @@
-package com.camunda.consulting;
+package com.camunda.consulting.simulator;
 
 import org.apache.ibatis.logging.LogFactory;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
@@ -9,6 +9,8 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+
+import com.camunda.consulting.simulator.PayloadGenerator;
 
 import static org.camunda.bpm.engine.test.assertions.ProcessEngineAssertions.assertThat;
 import static org.camunda.bpm.engine.test.assertions.ProcessEngineAssertions.init;

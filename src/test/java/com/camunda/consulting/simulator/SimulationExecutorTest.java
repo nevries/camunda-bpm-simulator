@@ -1,4 +1,4 @@
-package com.camunda.consulting;
+package com.camunda.consulting.simulator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.condition.AnyOf.anyOf;
@@ -18,6 +18,9 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+
+import com.camunda.consulting.simulator.PayloadGenerator;
+import com.camunda.consulting.simulator.SimulationExecutor;
 
 /**
  * Test case starting an in-memory database-backed Process Engine.

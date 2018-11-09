@@ -1,4 +1,4 @@
-package com.camunda.consulting.jobhandler;
+package com.camunda.consulting.simulator.jobhandler;
 
 import java.util.Collections;
 import java.util.List;

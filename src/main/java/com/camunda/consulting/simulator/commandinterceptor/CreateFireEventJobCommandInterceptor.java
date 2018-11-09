@@ -1,4 +1,4 @@
-package com.camunda.consulting.commandinterceptor;
+package com.camunda.consulting.simulator.commandinterceptor;
 
 import java.util.Date;
 import java.util.Optional;
@@ -16,8 +16,8 @@ import org.camunda.bpm.engine.impl.pvm.process.ActivityImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.camunda.consulting.jobhandler.FireEventJobHandler;
-import com.camunda.consulting.listener.AbstractTimerJobCreator;
+import com.camunda.consulting.simulator.jobhandler.FireEventJobHandler;
+import com.camunda.consulting.simulator.listener.AbstractTimerJobCreator;
 
 public class CreateFireEventJobCommandInterceptor extends CommandInterceptor {
   static final Logger LOG = LoggerFactory.getLogger(CreateFireEventJobCommandInterceptor.class);

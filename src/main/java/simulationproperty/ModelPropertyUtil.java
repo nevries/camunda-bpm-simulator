@@ -18,7 +18,7 @@ import org.camunda.bpm.model.bpmn.instance.camunda.CamundaProperty;
 import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import org.jgrapht.graph.DirectedAcyclicGraph;
 
-import com.camunda.consulting.listener.PayloadGeneratorListener;
+import com.camunda.consulting.simulator.listener.PayloadGeneratorListener;
 
 public class ModelPropertyUtil {
 

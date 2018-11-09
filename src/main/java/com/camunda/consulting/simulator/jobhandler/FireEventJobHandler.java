@@ -1,4 +1,4 @@
-package com.camunda.consulting.jobhandler;
+package com.camunda.consulting.simulator.jobhandler;
 
 import org.camunda.bpm.engine.ProcessEngineException;
 import org.camunda.bpm.engine.impl.SignalEventReceivedBuilderImpl;

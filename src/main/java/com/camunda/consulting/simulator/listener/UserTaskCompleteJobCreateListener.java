@@ -1,4 +1,4 @@
-package com.camunda.consulting.listener;
+package com.camunda.consulting.simulator.listener;
 
 import java.util.Date;
 import java.util.Optional;
@@ -8,7 +8,7 @@ import org.camunda.bpm.engine.delegate.TaskListener;
 import org.camunda.bpm.engine.impl.el.Expression;
 import org.camunda.bpm.engine.impl.persistence.entity.ExecutionEntity;
 
-import com.camunda.consulting.jobhandler.CompleteUserTaskJobHandler;
+import com.camunda.consulting.simulator.jobhandler.CompleteUserTaskJobHandler;
 
 public class UserTaskCompleteJobCreateListener extends AbstractTimerJobCreator implements TaskListener {
 

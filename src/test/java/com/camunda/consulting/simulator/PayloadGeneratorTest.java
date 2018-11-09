@@ -1,4 +1,4 @@
-package com.camunda.consulting;
+package com.camunda.consulting.simulator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -10,6 +10,8 @@ import java.util.Date;
 import org.camunda.bpm.engine.impl.util.ClockUtil;
 import org.joda.time.DateTime;
 import org.junit.Test;
+
+import com.camunda.consulting.simulator.PayloadGenerator;
 
 public class PayloadGeneratorTest {
 

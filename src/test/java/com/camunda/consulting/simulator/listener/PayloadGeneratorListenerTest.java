@@ -1,25 +1,22 @@
-package com.camunda.consulting.jobhandler;
+package com.camunda.consulting.simulator.listener;
 
-import com.camunda.consulting.PayloadGenerator;
-import com.camunda.consulting.SimulationExecutor;
 import org.apache.ibatis.logging.LogFactory;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.test.Deployment;
 import org.camunda.bpm.engine.test.ProcessEngineRule;
 import org.camunda.bpm.engine.test.mock.Mocks;
-import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import com.camunda.consulting.simulator.PayloadGenerator;
+
 import static org.camunda.bpm.engine.test.assertions.ProcessEngineAssertions.assertThat;
 import static org.camunda.bpm.engine.test.assertions.ProcessEngineAssertions.init;
-import static org.camunda.bpm.engine.test.assertions.ProcessEngineTests.jobQuery;
 import static org.camunda.bpm.engine.test.assertions.ProcessEngineTests.runtimeService;
 
-@Deployment(resources = "externalTaskCompleteModel.bpmn")
-public class CompleteExternalTaskJobHandlerTest {
-
+@Deployment(resources = "payloadGeneratorTestModel.bpmn")
+public class PayloadGeneratorListenerTest {
 
   @Rule
   public ProcessEngineRule rule = new ProcessEngineRule();
@@ -35,18 +32,14 @@ public class CompleteExternalTaskJobHandlerTest {
   }
 
   @Test
-  public void shouldExecuteCompleteExternalTaskJob() {
+  public void shouldCreateRandomValueWithTopologyCheck() {
 
-    ProcessInstance processInstance = runtimeService().startProcessInstanceByKey("externalTaskComplete");
-
-    assertThat(processInstance).isStarted().isWaitingAt("externalTask");
-    assertThat(jobQuery().count()).isEqualTo(1); // simulation job was created
-
-    SimulationExecutor.execute(DateTime.now().minusMinutes(5).toDate(), DateTime.now().plusMinutes(5).toDate());
-
-    assertThat(processInstance).isEnded();
-
+    ProcessInstance processInstance = runtimeService().startProcessInstanceByKey("payloadGenerator");
+    // async after service task
+    assertThat(processInstance).isWaitingAt("ST");
+    
+    int firstVar = (int)runtimeService().getVariable(processInstance.getId(), "firstVar");
+    assertThat(firstVar).isBetween(7, 13);
   }
-
 
 }

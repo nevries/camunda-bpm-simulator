@@ -1,4 +1,4 @@
-package com.camunda.consulting.modding;
+package com.camunda.consulting.simulator.modding;
 
 import java.util.Date;
 import java.util.Iterator;
@@ -16,7 +16,7 @@ import org.camunda.bpm.engine.runtime.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.camunda.consulting.jobhandler.StartProcessInstanceJobHandler;
+import com.camunda.consulting.simulator.jobhandler.StartProcessInstanceJobHandler;
 
 public class SimulatingBpmnDeployer extends BpmnDeployer {
   private static final Logger LOG = LoggerFactory.getLogger(SimulatingBpmnDeployer.class);
