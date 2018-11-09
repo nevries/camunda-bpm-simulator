@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_0u1r9ib" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="1.16.0">
+  <bpmn:process id="stinkyPeopleCheck" name="Check for stinky people" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1guuqyr" name="Need to take a shower">
+      <bpmn:outgoing>SequenceFlow_1md76tu</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_0la52he">
+        <bpmn:timeCycle xsi:type="bpmn:tFormalExpression">0 15 8,20 * * ?</bpmn:timeCycle>
+      </bpmn:timerEventDefinition>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1md76tu" sourceRef="StartEvent_1guuqyr" targetRef="Task_1g7l2sx" />
+    <bpmn:subProcess id="Task_1g7l2sx">
+      <bpmn:incoming>SequenceFlow_1md76tu</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1diob4i</bpmn:outgoing>
+      <bpmn:multiInstanceLoopCharacteristics isSequential="true">
+        <bpmn:loopCardinality xsi:type="bpmn:tFormalExpression">40</bpmn:loopCardinality>
+      </bpmn:multiInstanceLoopCharacteristics>
+      <bpmn:startEvent id="StartEvent_0vczvyy">
+        <bpmn:extensionElements>
+          <camunda:properties>
+            <camunda:property name="simGeneratePayload" value="camundo=${generator.firstname()}" />
+          </camunda:properties>
+        </bpmn:extensionElements>
+        <bpmn:outgoing>SequenceFlow_1qn8h4v</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:sequenceFlow id="SequenceFlow_1qn8h4v" sourceRef="StartEvent_0vczvyy" targetRef="IntermediateThrowEvent_1egrcc8" />
+      <bpmn:intermediateThrowEvent id="IntermediateThrowEvent_1egrcc8" name="Somebody needs a showe">
+        <bpmn:incoming>SequenceFlow_1qn8h4v</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1rzw8j3</bpmn:outgoing>
+        <bpmn:signalEventDefinition signalRef="Signal_0cmwkz7">
+          <bpmn:extensionElements>
+            <camunda:in source="camundo" target="camundo" />
+          </bpmn:extensionElements>
+        </bpmn:signalEventDefinition>
+      </bpmn:intermediateThrowEvent>
+      <bpmn:sequenceFlow id="SequenceFlow_1rzw8j3" sourceRef="IntermediateThrowEvent_1egrcc8" targetRef="IntermediateThrowEvent_0afdvjy" />
+      <bpmn:intermediateCatchEvent id="IntermediateThrowEvent_0afdvjy" name="1 minute">
+        <bpmn:incoming>SequenceFlow_1rzw8j3</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1bkhgh3</bpmn:outgoing>
+        <bpmn:timerEventDefinition>
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT1M</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:intermediateCatchEvent>
+      <bpmn:endEvent id="EndEvent_178dxce">
+        <bpmn:incoming>SequenceFlow_1bkhgh3</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow_1bkhgh3" sourceRef="IntermediateThrowEvent_0afdvjy" targetRef="EndEvent_178dxce" />
+    </bpmn:subProcess>
+    <bpmn:endEvent id="EndEvent_05eaizy">
+      <bpmn:incoming>SequenceFlow_1diob4i</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1diob4i" sourceRef="Task_1g7l2sx" targetRef="EndEvent_05eaizy" />
+    <bpmn:textAnnotation id="TextAnnotation_16iknn1">
+      <bpmn:text>40 Camundos</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_1rsog7x" sourceRef="Task_1g7l2sx" targetRef="TextAnnotation_16iknn1" />
+  </bpmn:process>
+  <bpmn:signal id="Signal_0cmwkz7" name="Signal_NeedShower" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="stinkyPeopleCheck">
+      <bpmndi:BPMNShape id="StartEvent_1guuqyr_di" bpmnElement="StartEvent_1guuqyr">
+        <dc:Bounds x="169" y="117" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="152" y="153" width="72" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1md76tu_di" bpmnElement="SequenceFlow_1md76tu">
+        <di:waypoint x="205" y="135" />
+        <di:waypoint x="259" y="135" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="SubProcess_0i84gg6_di" bpmnElement="Task_1g7l2sx" isExpanded="true">
+        <dc:Bounds x="259" y="35" width="350" height="200" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_0vczvyy_di" bpmnElement="StartEvent_0vczvyy">
+        <dc:Bounds x="282.25" y="118.75" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1qn8h4v_di" bpmnElement="SequenceFlow_1qn8h4v">
+        <di:waypoint x="318" y="137" />
+        <di:waypoint x="369" y="137" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="IntermediateThrowEvent_0sl7ev1_di" bpmnElement="IntermediateThrowEvent_1egrcc8">
+        <dc:Bounds x="369" y="119" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="344" y="162" width="86" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1rzw8j3_di" bpmnElement="SequenceFlow_1rzw8j3">
+        <di:waypoint x="405" y="137" />
+        <di:waypoint x="456" y="137" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_0ces73c_di" bpmnElement="IntermediateThrowEvent_0afdvjy">
+        <dc:Bounds x="456" y="119" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="453" y="162" width="43" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_178dxce_di" bpmnElement="EndEvent_178dxce">
+        <dc:Bounds x="543" y="119" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1bkhgh3_di" bpmnElement="SequenceFlow_1bkhgh3">
+        <di:waypoint x="492" y="137" />
+        <di:waypoint x="543" y="137" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_05eaizy_di" bpmnElement="EndEvent_05eaizy">
+        <dc:Bounds x="663" y="117" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1diob4i_di" bpmnElement="SequenceFlow_1diob4i">
+        <di:waypoint x="609" y="135" />
+        <di:waypoint x="663" y="135" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_16iknn1_di" bpmnElement="TextAnnotation_16iknn1">
+        <dc:Bounds x="391" y="263" width="85" height="31" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_1rsog7x_di" bpmnElement="Association_1rsog7x">
+        <di:waypoint x="434" y="235" />
+        <di:waypoint x="434" y="263" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
