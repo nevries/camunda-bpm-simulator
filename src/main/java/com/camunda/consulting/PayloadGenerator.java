@@ -6,7 +6,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.Period;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -14,7 +21,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.camunda.bpm.engine.impl.util.ClockUtil;
@@ -22,8 +28,6 @@ import org.camunda.bpm.engine.variable.Variables;
 import org.camunda.bpm.engine.variable.Variables.SerializationDataFormats;
 import org.camunda.bpm.engine.variable.value.FileValue;
 import org.camunda.bpm.engine.variable.value.TypedValue;
-import org.joda.time.DateTime;
-import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -491,7 +495,7 @@ public class PayloadGenerator {
    * @return
    */
   public Date nowPlusMillis(int millis) {
-    return nowPlusPeriod(Period.millis(millis));
+    return nowPlusPeriod(Duration.ofMillis(millis));
   }
 
   /**
@@ -501,7 +505,7 @@ public class PayloadGenerator {
    * @return
    */
   public Date nowPlusSeconds(int seconds) {
-    return nowPlusPeriod(Period.seconds(seconds));
+    return nowPlusPeriod(Duration.ofSeconds(seconds));
   }
 
   /**
@@ -511,7 +515,7 @@ public class PayloadGenerator {
    * @return
    */
   public Date nowPlusMinutes(int minutes) {
-    return nowPlusPeriod(Period.minutes(minutes));
+    return nowPlusPeriod(Duration.ofMinutes(minutes));
   }
 
   /**
@@ -521,7 +525,7 @@ public class PayloadGenerator {
    * @return
    */
   public Date nowPlusHours(int hours) {
-    return nowPlusPeriod(Period.hours(hours));
+    return nowPlusPeriod(Duration.ofHours(hours));
   }
 
   /**
@@ -531,7 +535,7 @@ public class PayloadGenerator {
    * @return
    */
   public Date nowPlusDays(int days) {
-    return nowPlusPeriod(Period.days(days));
+    return nowPlusPeriod(Period.ofDays(days));
   }
 
   /**
@@ -541,7 +545,7 @@ public class PayloadGenerator {
    * @return
    */
   public Date nowPlusWeeks(int weeks) {
-    return nowPlusPeriod(Period.weeks(weeks));
+    return nowPlusPeriod(Period.ofWeeks(weeks));
   }
 
   /**
@@ -551,7 +555,7 @@ public class PayloadGenerator {
    * @return
    */
   public Date nowPlusMonths(int months) {
-    return nowPlusPeriod(Period.months(months));
+    return nowPlusPeriod(Period.ofMonths(months));
   }
 
   /**
@@ -561,11 +565,12 @@ public class PayloadGenerator {
    * @return
    */
   public Date nowPlusYears(int years) {
-    return nowPlusPeriod(Period.years(years));
+    return nowPlusPeriod(Period.ofYears(years));
   }
 
-  public Date nowPlusPeriod(Period period) {
-    return new DateTime(ClockUtil.getCurrentTime().getTime()).plus(period).toDate();
+  public Date nowPlusPeriod(TemporalAmount amount) {
+    return Date
+        .from(LocalDateTime.ofInstant(ClockUtil.getCurrentTime().toInstant(), ZoneId.systemDefault()).plus(amount).atZone(ZoneId.systemDefault()).toInstant());
   }
 
   /**
@@ -580,25 +585,44 @@ public class PayloadGenerator {
    * @param evening
    *          in format 'hh:mm'
    * @param times
+   *          must be at least 1
    * @return
    */
   public Date timesPerDay(String uniqueName, String morning, String evening, long times) {
-    // TODO: WTF
-    List<Integer> morningParts = Arrays.stream(morning.split(":")).map(Integer::parseInt).collect(Collectors.toList());
-    List<Integer> eveningParts = Arrays.stream(evening.split(":")).map(Integer::parseInt).collect(Collectors.toList());
-    long interval = ((eveningParts.get(0) * 60 * 60 * 1000 + eveningParts.get(1) * 60 * 1000)
-        - (morningParts.get(0) * 60 * 60 * 1000 + morningParts.get(1) * 60 * 1000)) / (times + 1);
-
-    DateTime newTime = new DateTime(ClockUtil.getCurrentTime().getTime()).plusMillis(normal(uniqueName + interval, interval, interval / 3).intValue());
-
-    DateTime endOfCurrentDay = new DateTime(ClockUtil.getCurrentTime().getTime()).withTimeAtStartOfDay().plusHours(eveningParts.get(0))
-        .plusMinutes(eveningParts.get(1));
-    if (newTime.isAfter(endOfCurrentDay)) {
-      newTime = new DateTime(ClockUtil.getCurrentTime().getTime()).plusDays(1).withTimeAtStartOfDay().plusHours(morningParts.get(0))
-          .plusMinutes(morningParts.get(1));
+    if (times < 1) {
+      throw new IllegalArgumentException("times must be at least 1");
     }
 
-    return newTime.toDate();
+    final LocalTime morningTime = LocalTime.parse(morning);
+    final LocalTime eveningTime = LocalTime.parse(evening);
+
+    final LocalDateTime now = LocalDateTime.ofInstant(ClockUtil.getCurrentTime().toInstant(), ZoneId.systemDefault());
+    final LocalDateTime todayMorning = now.with(morningTime);
+    final LocalDateTime todayEvening = todayMorning.with(eveningTime);
+
+    final long intervalNanos = todayMorning.until(todayEvening, ChronoUnit.NANOS) / times;
+    final long randomizedIntervalNanos = normal(uniqueName, intervalNanos, intervalNanos / 3).longValue();
+    
+    LocalDateTime nextSample = now.plusNanos(randomizedIntervalNanos);
+    if (nextSample.isBefore(todayMorning)) {
+      nextSample = todayMorning.plusNanos(randomizedIntervalNanos);
+    }
+    if (nextSample.isAfter(todayEvening)) {
+      final LocalDateTime tomorrowMorning = todayMorning.plusDays(1);
+      final LocalDateTime tomorrowEvening = todayEvening.plusDays(1);
+
+      long overhangNanos = todayEvening.until(nextSample, ChronoUnit.NANOS);
+      nextSample = tomorrowMorning.plusNanos(overhangNanos);
+
+      // in theory, it is possible to be again behind the evening hours, so...
+      if (nextSample.isAfter(tomorrowEvening)) {
+        final LocalDateTime dayAfterTomorrowMorning = tomorrowMorning.plusDays(1);
+        overhangNanos = tomorrowEvening.until(nextSample, ChronoUnit.NANOS);
+        nextSample = dayAfterTomorrowMorning.plusNanos(overhangNanos);
+      }
+    }
+
+    return Date.from(nextSample.atZone(ZoneId.systemDefault()).toInstant());
   }
 
   /**
